@@ -1,6 +1,9 @@
 import styled from "@emotion/styled";
+import { usePathname, useRouter } from "next/navigation";
 
 const Header = () => {
+  const router = useRouter();
+  const pathName = usePathname();
   return (
     <Container>
       <div
@@ -10,7 +13,11 @@ const Header = () => {
           gap: "4rem",
         }}
       >
-        <Logo>
+        <Logo
+          onClick={() => {
+            router.push("/");
+          }}
+        >
           <svg
             width="101"
             height="24"
@@ -43,12 +50,39 @@ const Header = () => {
           </svg>
         </Logo>
         <Nav>
-          <NavItem selected>채팅</NavItem>
-          <NavItem>스키마</NavItem>
-          <NavItem>업로드</NavItem>
+          <NavItem
+            selected={pathName.startsWith("/chat")}
+            onClick={() => {
+              router.push("/chat");
+            }}
+          >
+            채팅
+          </NavItem>
+          <NavItem
+            selected={pathName.startsWith("/schema")}
+            onClick={() => {
+              router.push("/schema");
+            }}
+          >
+            스키마
+          </NavItem>
+          <NavItem
+            selected={pathName.startsWith("/upload")}
+            onClick={() => {
+              router.push("/upload");
+            }}
+          >
+            업로드
+          </NavItem>
         </Nav>
       </div>
-      <Login>로그인</Login>
+      <Login
+        onClick={() => {
+          router.push("/auth/login");
+        }}
+      >
+        로그인
+      </Login>
     </Container>
   );
 };
@@ -74,6 +108,7 @@ const Logo = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  cursor: pointer;
 `;
 
 const Nav = styled.nav`
@@ -88,6 +123,28 @@ const NavItem = styled.div<{
   font-weight: bold;
   cursor: pointer;
   color: ${(props) => (props.selected ? "black" : "#828282")};
+  transition: color 0.2s ease-in-out;
+  position: relative;
+
+  &:hover {
+    color: black;
+  }
+
+  ${(props) =>
+    props.selected &&
+    `
+    &::after {
+      content: "";
+      display: block;
+      width: 8px;
+      height: 8px;
+      background-color: #FFD600;
+      position: absolute;
+      top: 0;
+      right: -8px;
+      border-radius: 50%;
+    }
+  `}
 `;
 
 const Login = styled.div`
