@@ -1,13 +1,16 @@
 "use client";
 
+import "./globals.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
 import Analytics from "@/components/Analytics";
 import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import * as gtag from "@/lib/gtag";
 import { ToastContainer, Flip } from "react-toastify";
-import "./globals.css";
+import "react-toastify/dist/ReactToastify.css";
 import Header from "@/components/Header";
+import { usePathname } from "next/navigation";
+import Footer from "@/components/Footer";
 
 export default function RootLayout({
   children,
@@ -23,6 +26,8 @@ export default function RootLayout({
       },
     },
   });
+
+  const pathName = usePathname();
 
   useEffect(() => {
     if (document.body.getAttribute("style") === "") {
@@ -173,11 +178,12 @@ export default function RootLayout({
         <QueryClientProvider client={queryClient}>
           <Header />
           {children}
+          {!pathName.startsWith("/chat") && <Footer />}
         </QueryClientProvider>
         <GoogleAnalytics gaId={gtag.GA_TRACKING_ID || ""} />
         {/* <GoogleTagManager gtmId={gtag.GTM_TRACKING_ID || ""} /> */}
         <ToastContainer
-          position="top-center"
+          position="top-right"
           autoClose={2000}
           hideProgressBar={false}
           newestOnTop={false}
