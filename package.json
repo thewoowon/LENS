@@ -19,7 +19,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postbuild": "next-sitemap"
   },
   "dependencies": {
     "@emotion/css": "^11.11.2",
@@ -63,5 +64,10 @@
       "prettier --write",
       "git add"
     ]
+  },
+  "resolutions": {
+    "strip-ansi": "6.0.1",
+    "string-width": "4.2.2",
+    "wrap-ansi": "7.0.0"
   }
 }
