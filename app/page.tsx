@@ -11,7 +11,7 @@ const snapScrollArray: {
 }[] = [
   {
     title: ["SQL이 이렇게", "쉬워질수가!"],
-    description: "LENS와 함께라면",
+    description: "LENS와 함께라면 가능합니다",
     image: "/images/figure_1.png",
     alt: "main_lens_chat",
   },
@@ -23,13 +23,13 @@ const snapScrollArray: {
   },
   {
     title: ["채팅으로", "시작하는 SQL"],
-    description: "LENS와 함께라면",
+    description: "LENS의 능력은 무한합니다",
     image: "/images/figure_3.png",
     alt: "main_lens_chat",
   },
   {
-    title: ["쉽고 빠른", "다운로드"],
-    description: "LENS가 도와드릴게요",
+    title: ["정말 쉽고 빠른", "다운로드"],
+    description: "LENS의 능력을 느껴보세요",
     image: "/images/figure_4.png",
     alt: "main_lens_chat",
   },
@@ -133,46 +133,28 @@ export default function Home() {
         {snapScrollArray.map((item, index) => (
           <SnapItem key={index}>
             <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
               style={{
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "flex-start",
-                justifyContent: "center",
+                justifyContent: "flex-start",
+                height: "100%",
               }}
             >
-              <div
-                style={{
-                  fontSize: "120px",
-                  fontWeight: 700,
-                  lineHeight: "132px",
-                }}
-              >
-                {item.title[0]}
-              </div>
-              <div
-                style={{
-                  fontSize: "120px",
-                  fontWeight: 700,
-                  lineHeight: "132px",
-                }}
-              >
-                {item.title[1]}
-              </div>
-              <div>
-                <span
-                  style={{
-                    fontSize: "32px",
-                    fontWeight: 400,
-                    color: "rgba(255, 255, 255, 0.8)",
-                  }}
-                >
-                  {item.description}
-                </span>
-              </div>
+              <SnapTitle>{item.title[0]}</SnapTitle>
+              <SnapTitle>{item.title[1]}</SnapTitle>
+              <SnapDescription>{item.description}</SnapDescription>
             </motion.div>
-            <motion.div>
+            <SnapImage
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+            >
               <Image src={item.image} alt={item.alt} width={400} height={400} />
-            </motion.div>
+            </SnapImage>
           </SnapItem>
         ))}
       </SnapScrollSection>
@@ -367,14 +349,18 @@ const SnapScrollSection = styled.section`
   position: sticky;
   top: 0;
   height: 100vh;
+  margin: 0 auto;
 `;
 
 const SnapItem = styled.div`
   scroll-snap-align: start;
+  max-width: 1200px;
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
+  margin: 0 auto;
+  padding: 160px 0;
 `;
 
 const Button = styled.button`
@@ -435,5 +421,77 @@ const ImageContainer = styled.div`
 
   @media (max-width: 500px) {
     padding: 10px 10px;
+  }
+`;
+
+// fontSize: "120px",
+// fontWeight: 700,
+// lineHeight: "132px",
+
+const SnapTitle = styled.div`
+  font-size: 120px;
+  font-weight: 700;
+  line-height: 132px;
+
+  @media (max-width: 1440px) {
+    font-size: 100px;
+    line-height: 110px;
+  }
+
+  @media (max-width: 1200px) {
+    font-size: 80px;
+    line-height: 88px;
+  }
+
+  @media (max-width: 1000px) {
+    font-size: 60px;
+    line-height: 66px;
+  }
+
+  @media (max-width: 700px) {
+    font-size: 40px;
+    line-height: 44px;
+  }
+
+  @media (max-width: 500px) {
+    font-size: 30px;
+    line-height: 33px;
+  }
+`;
+
+const SnapDescription = styled.div`
+  font-size: 32px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.8);
+
+  @media (max-width: 1440px) {
+    font-size: 28px;
+  }
+
+  @media (max-width: 1200px) {
+    font-size: 24px;
+  }
+
+  @media (max-width: 1000px) {
+    font-size: 20px;
+  }
+
+  @media (max-width: 700px) {
+    font-size: 16px;
+  }
+
+  @media (max-width: 500px) {
+    font-size: 14px;
+  }
+`;
+
+const SnapImage = styled(motion.div)`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  height: 100%;
+  @media (max-width: 1200px) {
+    display: none;
   }
 `;
