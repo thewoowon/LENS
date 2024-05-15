@@ -1,14 +1,28 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import styled from "@emotion/styled";
+import { Controller, Control } from "react-hook-form";
+import { COLORS } from "@/styles/colors";
 
 type ChatBoxProps = {
-  value: string;
-  onChange: (value: string) => void;
   onSubmit: () => void;
+  control: Control<{
+    chat: string;
+  }>;
 };
 
-const ChatBox = ({ value, onChange, onSubmit }: ChatBoxProps) => {
-  const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+const ChatBox = ({ onSubmit, control }: ChatBoxProps) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const adjustHeight = () => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "20px";
+      textareaRef.current.style.height = `${Math.min(
+        textareaRef.current.scrollHeight,
+        96
+      )}px`;
+    }
+  };
+  const onKeyUp = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.currentTarget.value) {
       return;
     }
@@ -26,16 +40,36 @@ const ChatBox = ({ value, onChange, onSubmit }: ChatBoxProps) => {
       onSubmit();
     }
   };
+
+  useEffect(() => {
+    adjustHeight();
+  }, []);
+
   return (
     <Form>
-      <TextArea
+      <Controller
+        name="chat"
+        control={control}
+        defaultValue=""
+        render={({ field }) => (
+          <textarea
+            {...field}
+            ref={textareaRef}
+            onInput={adjustHeight}
+            onKeyUp={onKeyUp}
+            className="resize-none"
+            placeholder="LENS와 대화를 시작하세요."
+          />
+        )}
+      />
+      {/* <TextArea
         value={value}
         onChange={(e) => {
           onChange(e.target.value);
         }}
         onKeyDown={onKeyDown}
         placeholder="LENS와 대화를 시작하세요."
-      />
+      /> */}
       <div
         style={{
           display: "flex",
@@ -44,7 +78,7 @@ const ChatBox = ({ value, onChange, onSubmit }: ChatBoxProps) => {
           height: "100%",
         }}
       >
-        <Button onClick={onSubmit} type="submit">
+        <button onClick={onSubmit} type="submit">
           <svg
             width="23"
             height="27"
@@ -57,7 +91,7 @@ const ChatBox = ({ value, onChange, onSubmit }: ChatBoxProps) => {
               fill="white"
             />
           </svg>
-        </Button>
+        </button>
       </div>
     </Form>
   );
@@ -67,7 +101,7 @@ export default ChatBox;
 
 const Form = styled.form`
   width: 100%;
-  max-height: 100px;
+  max-height: 200px;
   padding: 13px;
   border: solid 1px #e5e5e1;
   background-color: white;
@@ -75,8 +109,29 @@ const Form = styled.form`
   display: flex;
   justify-content: space-between;
   max-width: 1000px;
-  height: 100%;
   overflow: hidden;
+  align-items: center;
+
+  textarea {
+    flex: 1;
+    font-size: 16px;
+    &:focus {
+      outline: none;
+    }
+    background-color: transparent;
+  }
+
+  button {
+    width: 36px;
+    height: 36px;
+    background-color: black;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 `;
 
 const TextArea = styled.textarea`

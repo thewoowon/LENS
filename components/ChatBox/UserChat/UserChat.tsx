@@ -40,7 +40,9 @@ const UserChat = ({ chat }: UserChatProps) => {
           paddingLeft: "32px",
         }}
       >
-        {chat}
+        {chat.split("\n").map((line, index) => (
+          <div key={index}>{line}</div>
+        ))}
       </div>
     </Container>
   );

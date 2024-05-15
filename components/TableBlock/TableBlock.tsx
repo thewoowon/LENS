@@ -124,8 +124,14 @@ const Container = styled.div`
   display: flex;
   margin: 20px 0;
   background-color: white;
-  border-radius: 10px;
-  padding: 10px 16px;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f9f9f9;
+  }
 `;
 
 const Info = styled.div`
