@@ -5,8 +5,12 @@ import SQLBlock from "@/components/SQLBlock";
 import TableBlock from "@/components/TableBlock";
 import { historyArray, SQLArray, tableArray } from "@/contants";
 import styled from "@emotion/styled";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
+
+type FormType = {
+  chat: string;
+};
 
 const ChatPage = () => {
   const [chatContext, setChatContext] = useState<
@@ -19,24 +23,19 @@ const ChatPage = () => {
     "table"
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const {
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors },
-  } = useForm<{
-    message: string;
-  }>({
-    defaultValues: {
-      message: "",
-    },
-  });
 
-  const createChat = (message: string) => {
+  const { getValues, watch, setValue, handleSubmit, control } =
+    useForm<FormType>({
+      defaultValues: {
+        chat: "",
+      },
+    });
+
+  const createChat = (chat: string) => {
     setChatContext([
       ...chatContext,
       {
-        chat: message,
+        chat,
         role: "user",
       },
     ]);
@@ -44,7 +43,7 @@ const ChatPage = () => {
       setChatContext([
         ...chatContext,
         {
-          chat: message,
+          chat,
           role: "user",
         },
         {
@@ -56,11 +55,10 @@ const ChatPage = () => {
     }, 3000);
   };
 
-  const onSubmit = (data: { message: string }) => {
-    setValue("message", "");
+  const onSubmit = (data: { chat: string }) => {
+    setValue("chat", "");
     setIsLoading(true);
-
-    createChat(data.message);
+    createChat(data.chat);
   };
 
   return (
@@ -124,18 +122,12 @@ const ChatPage = () => {
             {chatContext.map((context, index) => {
               const { chat, role } = context;
               if (role === "user") {
-                return <UserChat key={index} chat={chat}></UserChat>;
+                return <UserChat key={index} chat={chat} />;
               }
-              return <LensChat key={index} chat={chat}></LensChat>;
+              return <LensChat key={index} chat={chat} />;
             })}
           </ChatContext>
-          <ChatBox
-            value={watch("message") || ""}
-            onChange={(value) => {
-              setValue("message", value);
-            }}
-            onSubmit={handleSubmit(onSubmit)}
-          />
+          <ChatBox onSubmit={handleSubmit(onSubmit)} control={control} />
         </Wrapper>
       </ChatArea>
     </Container>
@@ -155,7 +147,8 @@ const LeftSide = styled.div`
   min-width: 350px;
   height: 100%;
   border-right: 1px solid #e5e5e5;
-  background-color: #ebf3e8;
+  // 5개의 색상을 선형 그라디언트로 배경색을 지정
+  background: linear-gradient(180deg, #f9f9f9 0%, #f0f0f0 100%);
   padding: 20px 30px;
 `;
 
@@ -190,24 +183,27 @@ const Tab = styled.div<{
   padding: 10px 0;
   cursor: pointer;
   border-radius: 10px;
-  background-color: ${(props) => (props.selected ? "white" : "none")};
-  color: #333;
+  color: ${(props) => (props.selected ? "black" : "#828282")};
   font-size: 16px;
   font-weight: 700;
   display: flex;
   justify-content: center;
   align-items: center;
+  transition:
+    background-color 0.2s ease-in-out,
+    color 0.2s ease-in-out;
   &:hover {
-    background-color: white;
+    color: black;
+    text-decoration: underline;
   }
 `;
 
 const Title = styled.div`
   width: 100%;
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 500;
   color: #3e3e3e;
-  padding: 26px 50px;
+  padding: 26px 40px;
   border-bottom: 1px solid #dbdbd5;
 `;
 
@@ -217,5 +213,5 @@ const Wrapper = styled.div`
   flex: 1;
   width: 100%;
   justify-content: space-between;
-  padding: 45px 50px 36px 50px;
+  padding: 45px 40px 36px 40px;
 `;
