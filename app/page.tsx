@@ -2,6 +2,7 @@
 import styled from "@emotion/styled";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const snapScrollArray: {
   title: string[];
@@ -36,6 +37,7 @@ const snapScrollArray: {
 ];
 
 export default function Home() {
+  const router = useRouter();
   return (
     <Main>
       <Section height="100vh">
@@ -89,7 +91,7 @@ export default function Home() {
             >
               LENS
             </span>
-            는 데이터 분석가를 위한 데이터 추출 및 EDA 자동화 솔루션 입니다
+            는 데이터 분석가를 위한 데이터 추출 및 EDA 자동화 솔루션입니다
           </SubTitle>
           <div
             style={{
@@ -99,7 +101,14 @@ export default function Home() {
               boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
             }}
           >
-            <Button>지금 바로 시작하기</Button>
+            <Button
+              onClick={() => {
+                // TODO: 로그인 되어 있는지 확인 필요
+                router.push("/chat");
+              }}
+            >
+              지금 바로 시작하기
+            </Button>
           </div>
         </motion.div>
         <motion.div
