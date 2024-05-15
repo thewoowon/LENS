@@ -129,7 +129,7 @@ export default function Home() {
           </ImageContainer>
         </motion.div>
       </Section>
-      <SnapScrollSection>
+      {/* <SnapScrollSection>
         {snapScrollArray.map((item, index) => (
           <SnapItem key={index}>
             <motion.div
@@ -157,7 +157,7 @@ export default function Home() {
             </SnapImage>
           </SnapItem>
         ))}
-      </SnapScrollSection>
+      </SnapScrollSection> */}
     </Main>
   );
 }
