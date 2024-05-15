@@ -138,6 +138,9 @@ export default function Home() {
               maxWidth: "1542px",
               maxHeight: "1188px",
               backgroundColor: "rgba(255, 255, 255, 0.06)",
+              padding: "100px 60px",
+              borderRadius: "20px",
+              boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.06)",
             }}
           >
             <Image
