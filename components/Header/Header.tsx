@@ -95,6 +95,24 @@ const Header = () => {
         >
           로그인
         </Login>
+        <HamburgerMenu
+          onClick={() => {
+            toast.info("준비 중인 기능입니다. 커밍순!");
+          }}
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M2 4H22V6H2V4ZM2 11H22V13H2V11ZM2 18H22V20H2V18Z"
+              fill="white"
+            />
+          </svg>
+        </HamburgerMenu>
       </div>
     </Container>
   );
@@ -127,6 +145,10 @@ const Logo = styled.div`
 const Nav = styled.nav`
   display: flex;
   gap: 3rem;
+
+  @media (max-width: 1000px) {
+    display: none;
+  }
 `;
 
 const NavItem = styled.div<{
@@ -165,4 +187,18 @@ const Login = styled.div`
   font-weight: 400;
   cursor: pointer;
   color: #828282;
+
+  @media (max-width: 1000px) {
+    display: none;
+  }
+`;
+
+const HamburgerMenu = styled.div`
+  display: none;
+  cursor: pointer;
+
+  @media (max-width: 1000px) {
+    display: block;
+    font-size: 1.5rem;
+  }
 `;

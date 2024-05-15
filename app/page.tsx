@@ -99,21 +99,7 @@ export default function Home() {
               boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
             }}
           >
-            <button
-              style={{
-                background: "linear-gradient(180deg, #FFFFFF 0%, #E1FFE1 100%)",
-                border: "none",
-                color: "#333333",
-                fontSize: "24px",
-                fontWeight: 700,
-                cursor: "pointer",
-                padding: "16px 32px",
-                borderRadius: "8px",
-                transition: "background 0.2s ease-in-out",
-              }}
-            >
-              지금 바로 시작하기
-            </button>
+            <Button>지금 바로 시작하기</Button>
           </div>
         </motion.div>
         <motion.div
@@ -131,18 +117,7 @@ export default function Home() {
             zIndex: 2,
           }}
         >
-          <div
-            style={{
-              // width={1542}
-              // height={1188}
-              maxWidth: "1542px",
-              maxHeight: "1188px",
-              backgroundColor: "rgba(255, 255, 255, 0.06)",
-              padding: "100px 60px",
-              borderRadius: "20px",
-              boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.06)",
-            }}
-          >
+          <ImageContainer>
             <Image
               src={"/main_lens_chat.png"}
               width={1542}
@@ -151,7 +126,7 @@ export default function Home() {
               priority
               blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkAAIAAAoAAv/lxKUAAAAASUVORK5CYII="
             />
-          </div>
+          </ImageContainer>
         </motion.div>
       </Section>
       <SnapScrollSection>
@@ -315,6 +290,16 @@ const MainTitle = styled.div`
     font-size: 64px;
     line-height: 70px;
   }
+
+  @media (max-width: 700px) {
+    font-size: 48px;
+    line-height: 52px;
+  }
+
+  @media (max-width: 500px) {
+    font-size: 32px;
+    line-height: 36px;
+  }
 `;
 
 const SubTitle = styled.div`
@@ -341,6 +326,16 @@ const SubTitle = styled.div`
   @media (max-width: 1000px) {
     font-size: 18px;
     line-height: 28px;
+  }
+
+  @media (max-width: 700px) {
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  @media (max-width: 500px) {
+    font-size: 14px;
+    line-height: 20px;
   }
 `;
 
@@ -380,4 +375,65 @@ const SnapItem = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+`;
+
+const Button = styled.button`
+  background: linear-gradient(180deg, #ffffff 0%, #e1ffe1 100%);
+  border: none;
+  color: #333333;
+  font-size: 24px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 16px 32px;
+  border-radius: 8px;
+  transition: background 0.2s ease-in-out;
+
+  &:hover {
+    background: linear-gradient(180deg, #e1ffe1 0%, #ffffff 100%);
+  }
+
+  @media (max-width: 1440px) {
+    font-size: 20px;
+  }
+
+  @media (max-width: 1200px) {
+    font-size: 18px;
+  }
+
+  @media (max-width: 1000px) {
+    font-size: 16px;
+  }
+
+  @media (max-width: 700px) {
+    font-size: 14px;
+  }
+`;
+
+const ImageContainer = styled.div`
+  max-width: 1542px;
+  max-height: 1188px;
+  background-color: rgba(255, 255, 255, 0.06);
+  padding: 100px 60px;
+  border-radius: 20px;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.06);
+
+  @media (max-width: 1440px) {
+    padding: 80px 40px;
+  }
+
+  @media (max-width: 1200px) {
+    padding: 60px 30px;
+  }
+
+  @media (max-width: 1000px) {
+    padding: 40px 20px;
+  }
+
+  @media (max-width: 700px) {
+    padding: 20px 10px;
+  }
+
+  @media (max-width: 500px) {
+    padding: 10px 10px;
+  }
 `;
