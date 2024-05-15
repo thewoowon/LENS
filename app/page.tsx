@@ -183,6 +183,11 @@ const Main = styled.main`
   overflow-x: hidden;
   position: relative;
   height: 100%;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 const Section = styled.section<{
