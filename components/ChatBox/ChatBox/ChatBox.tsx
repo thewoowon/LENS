@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styled from "@emotion/styled";
 import { Controller, Control } from "react-hook-form";
 import { COLORS } from "@/styles/colors";
@@ -8,9 +8,10 @@ type ChatBoxProps = {
   control: Control<{
     chat: string;
   }>;
+  isLoading?: boolean;
 };
 
-const ChatBox = ({ onSubmit, control }: ChatBoxProps) => {
+const ChatBox = ({ onSubmit, control, isLoading }: ChatBoxProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const adjustHeight = () => {
@@ -22,16 +23,27 @@ const ChatBox = ({ onSubmit, control }: ChatBoxProps) => {
       )}px`;
     }
   };
-  const onKeyUp = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.currentTarget.value) {
+  const onkeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // 디바운싱 처리
+    if (isLoading) {
       return;
     }
+    if (e.key === "Enter" && !e.currentTarget.value) {
+      console.log("빈값은 안됩니다.");
+      e.preventDefault();
+      return;
+    }
+    // shift + enter는 줄바꿈
     if (e.shiftKey && e.key === "Enter") {
-      if (!e.currentTarget.value.includes("\n")) {
-        return;
-      }
+      //줄바꿈
+      e.preventDefault();
+      e.currentTarget.value += "\n";
+      adjustHeight();
+      return;
     }
     if (e.key === "Enter" && e.currentTarget.value.includes("\n")) {
+      // submit이 아닌 줄바꿈
+      adjustHeight();
       return;
     }
     // 현재 value에 \n이 없으면 submit
@@ -43,7 +55,7 @@ const ChatBox = ({ onSubmit, control }: ChatBoxProps) => {
 
   useEffect(() => {
     adjustHeight();
-  }, []);
+  }, [isLoading]);
 
   return (
     <Form>
@@ -56,7 +68,7 @@ const ChatBox = ({ onSubmit, control }: ChatBoxProps) => {
             {...field}
             ref={textareaRef}
             onInput={adjustHeight}
-            onKeyUp={onKeyUp}
+            onKeyDown={onkeyDown}
             className="resize-none"
             placeholder="LENS와 대화를 시작하세요."
           />
@@ -79,18 +91,31 @@ const ChatBox = ({ onSubmit, control }: ChatBoxProps) => {
         }}
       >
         <button onClick={onSubmit} type="submit">
-          <svg
-            width="23"
-            height="27"
-            viewBox="0 0 23 27"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M0 24.1235L10.4785 0L5.66762 16.0823L19.5072 4.70702L14.3668 19.4818L23 14.6441L8.96275 27L16.6734 8.95642L0 24.1235Z"
-              fill="white"
-            />
-          </svg>
+          {isLoading ? (
+            // 여기에는 흰색 사각형 넣어주세요
+            <svg
+              width="10"
+              height="10"
+              viewBox="0 0 10 10"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <rect width="10" height="10" fill="white" />
+            </svg>
+          ) : (
+            <svg
+              width="23"
+              height="27"
+              viewBox="0 0 23 27"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M0 24.1235L10.4785 0L5.66762 16.0823L19.5072 4.70702L14.3668 19.4818L23 14.6441L8.96275 27L16.6734 8.95642L0 24.1235Z"
+                fill="white"
+              />
+            </svg>
+          )}
         </button>
       </div>
     </Form>
@@ -111,6 +136,11 @@ const Form = styled.form`
   max-width: 1000px;
   overflow: hidden;
   align-items: center;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   textarea {
     flex: 1;
@@ -119,6 +149,11 @@ const Form = styled.form`
       outline: none;
     }
     background-color: transparent;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   button {

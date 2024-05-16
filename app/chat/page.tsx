@@ -127,7 +127,11 @@ const ChatPage = () => {
               return <LensChat key={index} chat={chat} />;
             })}
           </ChatContext>
-          <ChatBox onSubmit={handleSubmit(onSubmit)} control={control} />
+          <ChatBox
+            onSubmit={handleSubmit(onSubmit)}
+            control={control}
+            isLoading={isLoading}
+          />
         </Wrapper>
       </ChatArea>
     </Container>
@@ -159,6 +163,11 @@ const ChatArea = styled.div`
   flex-direction: column;
   justify-content: space-between;
   border-right: 1px solid #e5e5e5;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 const ChatContext = styled.div`
@@ -168,6 +177,11 @@ const ChatContext = styled.div`
   flex: 1;
   padding 45px 50px 36px 50px;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 const Tabs = styled.div`
@@ -214,4 +228,10 @@ const Wrapper = styled.div`
   width: 100%;
   justify-content: space-between;
   padding: 45px 40px 36px 40px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
