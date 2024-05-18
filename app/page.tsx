@@ -1,8 +1,11 @@
 "use client";
+import customAxios from "@/lib/axios";
 import styled from "@emotion/styled";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 const snapScrollArray: {
   title: string[];
@@ -38,6 +41,23 @@ const snapScrollArray: {
 
 export default function Home() {
   const router = useRouter();
+
+  const { data } = useQuery({
+    queryKey: ["root"],
+    queryFn: () => {
+      return customAxios({
+        method: "GET",
+        url: "/",
+      }).then((res) => res.data);
+    },
+  });
+
+  useEffect(() => {
+    if (data) {
+      console.log(data);
+    }
+  }, [data]);
+
   return (
     <Main>
       <Section height="100vh">

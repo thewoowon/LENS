@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import styled from "@emotion/styled";
 import { Controller, Control } from "react-hook-form";
 import { COLORS } from "@/styles/colors";
+import { debounce } from "lodash";
 
 type ChatBoxProps = {
   onSubmit: () => void;
@@ -23,6 +24,21 @@ const ChatBox = ({ onSubmit, control, isLoading }: ChatBoxProps) => {
       )}px`;
     }
   };
+
+  const handleSubmitDebounced = debounce((onSubmit: () => void) => {
+    onSubmit();
+  }, 300);
+
+  const addNewLineDebounced = debounce(
+    (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (!event?.currentTarget?.value) return;
+      event.preventDefault();
+      event.currentTarget.value += "\n";
+      adjustHeight();
+    },
+    300
+  );
+
   const onkeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // 디바운싱 처리
     if (isLoading) {
@@ -36,9 +52,7 @@ const ChatBox = ({ onSubmit, control, isLoading }: ChatBoxProps) => {
     // shift + enter는 줄바꿈
     if (e.shiftKey && e.key === "Enter") {
       //줄바꿈
-      e.preventDefault();
-      e.currentTarget.value += "\n";
-      adjustHeight();
+      addNewLineDebounced(e);
       return;
     }
     if (e.key === "Enter" && e.currentTarget.value.includes("\n")) {
@@ -49,7 +63,7 @@ const ChatBox = ({ onSubmit, control, isLoading }: ChatBoxProps) => {
     // 현재 value에 \n이 없으면 submit
     if (e.key === "Enter" && !e.currentTarget.value.includes("\n")) {
       e.preventDefault();
-      onSubmit();
+      handleSubmitDebounced(onSubmit);
     }
   };
 
