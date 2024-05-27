@@ -1,10 +1,25 @@
 import styled from "@emotion/styled";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 const Header = () => {
   const router = useRouter();
   const pathName = usePathname();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const getAccessToken = async () => {
+      const accessToken = localStorage.getItem("accessToken");
+      if (accessToken) {
+        setIsLoggedIn(true);
+      } else {
+        setIsLoggedIn(false);
+      }
+    };
+
+    getAccessToken();
+  }, []);
   return (
     <Container>
       <div
@@ -90,10 +105,16 @@ const Header = () => {
         </div>
         <Login
           onClick={() => {
-            router.push("/auth/login");
+            if (isLoggedIn) {
+              localStorage.removeItem("accessToken");
+              setIsLoggedIn(false);
+              toast.info("로그아웃 되었습니다.");
+            } else {
+              router.push("/auth/login");
+            }
           }}
         >
-          로그인
+          {isLoggedIn ? "로그아웃" : "로그인"}
         </Login>
         <HamburgerMenu
           onClick={() => {

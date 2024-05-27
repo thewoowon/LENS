@@ -1,12 +1,32 @@
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 
 const OAuthLogin = () => {
-  const [session, setSession] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const handleGoogle = async () => {
+    const response = await fetch("http://localhost:3000/api/auth/login");
+    const { url } = await response.json();
+    window.location.href = url;
+  };
+
+  useEffect(() => {
+    const getAccessToken = async () => {
+      const accessToken = localStorage.getItem("accessToken");
+      if (accessToken) {
+        setIsLoggedIn(true);
+      } else {
+        setIsLoggedIn(false);
+      }
+    };
+
+    getAccessToken();
+  }, []);
+
   return (
     <div className="flex flex-col font-sans-kr">
-      {session ? (
+      {isLoggedIn ? (
         <div
           style={{ height: "500px" }}
           className="flex flex-col justify-center items-center font-sans-kr-light"
@@ -39,10 +59,16 @@ const OAuthLogin = () => {
             사용자의 로그인 정보가 없습니다. 로그인해주세요.
           </span>
           <br />
-          <ButtonBig className="m-2 flex justify-center items-center shadow-lg hover:bg-blue-600 bg-blue-500 text-white">
+          <ButtonBig
+            onClick={handleGoogle}
+            className="m-2 flex justify-center items-center shadow-lg hover:bg-blue-600 bg-blue-500 text-white"
+          >
             <span className="px-2">구글 로그인</span>
           </ButtonBig>
-          <ButtonBig className="m-2 flex justify-center items-center shadow-lg hover:bg-blue-600 bg-blue-500 text-white">
+          <ButtonBig
+            disabled
+            className="m-2 flex justify-center items-center shadow-lg hover:bg-blue-600 bg-blue-500 text-white"
+          >
             <span className="px-2">네이버 로그인</span>
           </ButtonBig>
         </>
