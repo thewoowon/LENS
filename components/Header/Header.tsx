@@ -2,11 +2,27 @@ import styled from "@emotion/styled";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import Drawer from "@mui/material/Drawer";
+import { Box } from "@mui/material";
 
 const Header = () => {
   const router = useRouter();
   const pathName = usePathname();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const [open, setOpen] = useState(false);
+
+  const toggleDrawer = (event: React.KeyboardEvent | React.MouseEvent) => {
+    if (
+      event.type === "keydown" &&
+      ((event as React.KeyboardEvent).key === "Tab" ||
+        (event as React.KeyboardEvent).key === "Shift")
+    ) {
+      return;
+    }
+
+    setOpen(!open);
+  };
 
   useEffect(() => {
     const getAccessToken = async () => {
@@ -117,8 +133,8 @@ const Header = () => {
           {isLoggedIn ? "로그아웃" : "로그인"}
         </Login>
         <HamburgerMenu
-          onClick={() => {
-            toast.info("준비 중인 기능입니다. 커밍순!");
+          onClick={(e) => {
+            toggleDrawer(e);
           }}
         >
           <svg
@@ -134,6 +150,67 @@ const Header = () => {
             />
           </svg>
         </HamburgerMenu>
+        <Drawer
+          anchor={"right"}
+          open={open}
+          onClose={(e) => {
+            setOpen(false);
+          }}
+          sx={{
+            ".MuiDrawer-paper": {
+              backgroundColor: "black",
+              fontFamily: "Pretendard Variable",
+              color: "white",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              alignItems: "center",
+            },
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              alignItems: "center",
+              width: "200px",
+              paddingY: "36px",
+              gap: "24px",
+            }}
+          >
+            {[
+              { name: "채팅", url: "/chat" },
+              { name: "스키마", url: "/schema" },
+              { name: "업로드", url: "/upload" },
+            ].map((item, index) => (
+              <NavItem
+                key={index}
+                selected={pathName.startsWith(`/${item.url}`)}
+                onClick={() => {
+                  router.push(`${item.url}`);
+                  setOpen(false);
+                }}
+              >
+                {item.name}
+              </NavItem>
+            ))}
+            <LoginMobile
+              onClick={() => {
+                if (isLoggedIn) {
+                  localStorage.removeItem("accessToken");
+                  setIsLoggedIn(false);
+                  toast.info("로그아웃 되었습니다.");
+                } else {
+                  router.push("/auth/login");
+                }
+                setOpen(false);
+              }}
+            >
+              {isLoggedIn ? "로그아웃" : "로그인"}
+            </LoginMobile>
+          </Box>
+        </Drawer>
       </div>
     </Container>
   );
@@ -211,6 +288,23 @@ const Login = styled.div`
 
   @media (max-width: 1000px) {
     display: none;
+  }
+`;
+
+const LoginMobile = styled.div`
+  font-size: 1rem;
+  font-weight: 400;
+  cursor: pointer;
+  color: #828282;
+  display: none;
+  transition: color 0.2s ease-in-out;
+
+  @media (max-width: 1000px) {
+    display: block;
+  }
+
+  &:hover {
+    color: white;
   }
 `;
 
