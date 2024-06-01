@@ -33,6 +33,7 @@ const CallbackPage = () => {
       }).then((res) => res.data);
 
       localStorage.setItem("accessToken", result["access_token"]);
+      localStorage.setItem("refreshToken", result["refresh_token"]);
       router.push("/");
     };
 
