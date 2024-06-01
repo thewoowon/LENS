@@ -4,6 +4,7 @@ import HistoryBlock from "@/components/HistoryBlock";
 import SQLBlock from "@/components/SQLBlock";
 import TableBlock from "@/components/TableBlock";
 import { historyArray, SQLArray, tableArray } from "@/contants";
+import customAxios from "@/lib/axios";
 import styled from "@emotion/styled";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -55,10 +56,20 @@ const ChatPage = () => {
     }, 3000);
   };
 
-  const onSubmit = (data: { chat: string }) => {
+  const onSubmit = async (data: { chat: string }) => {
     setValue("chat", "");
     setIsLoading(true);
     createChat(data.chat);
+
+    const result = await customAxios("/api/query/execute_query", {
+      method: "POST",
+      data: {
+        text: data.chat,
+      },
+    }).then((res) => {
+      const { data } = res;
+      setIsLoading(false);
+    });
   };
 
   return (

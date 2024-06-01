@@ -42,22 +42,6 @@ const snapScrollArray: {
 export default function Home() {
   const router = useRouter();
 
-  const { data } = useQuery({
-    queryKey: ["root"],
-    queryFn: () => {
-      return customAxios({
-        method: "GET",
-        url: "/",
-      }).then((res) => res.data);
-    },
-  });
-
-  useEffect(() => {
-    if (data) {
-      console.log(data);
-    }
-  }, [data]);
-
   return (
     <Main>
       <Section height="100vh">
@@ -104,7 +88,7 @@ export default function Home() {
           <SubTitle>
             <span
               style={{
-                fontFamily: " Goldman, sans-serif",
+                fontFamily: "Goldman, sans-serif",
                 fontWeight: 400,
                 fontStyle: "normal",
               }}
