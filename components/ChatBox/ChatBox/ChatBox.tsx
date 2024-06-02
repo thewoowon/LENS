@@ -3,8 +3,7 @@ import styled from "@emotion/styled";
 import { Controller, Control } from "react-hook-form";
 import { COLORS } from "@/styles/colors";
 import { debounce } from "lodash";
-
-type Mode = "chat" | "sql" | "schema";
+import { Mode } from "@/app/chat/page";
 
 type ChatBoxProps = {
   onSubmit: () => void;
@@ -12,11 +11,18 @@ type ChatBoxProps = {
     chat: string;
   }>;
   isLoading?: boolean;
+  mode: Mode;
+  setMode: React.Dispatch<React.SetStateAction<Mode>>;
 };
 
-const ChatBox = ({ onSubmit, control, isLoading }: ChatBoxProps) => {
+const ChatBox = ({
+  onSubmit,
+  control,
+  isLoading,
+  mode,
+  setMode,
+}: ChatBoxProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [mode, setMode] = useState<Mode>("sql");
   const [open, setOpen] = useState(false);
 
   const adjustHeight = () => {
@@ -283,14 +289,6 @@ const ChatBox = ({ onSubmit, control, isLoading }: ChatBoxProps) => {
           />
         )}
       />
-      {/* <TextArea
-        value={value}
-        onChange={(e) => {
-          onChange(e.target.value);
-        }}
-        onKeyDown={onKeyDown}
-        placeholder="LENS와 대화를 시작하세요."
-      /> */}
       <div
         style={{
           display: "flex",
@@ -301,7 +299,6 @@ const ChatBox = ({ onSubmit, control, isLoading }: ChatBoxProps) => {
       >
         <button onClick={onSubmit} type="submit">
           {isLoading ? (
-            // 여기에는 흰색 사각형 넣어주세요
             <svg
               width="10"
               height="10"
@@ -372,7 +369,8 @@ const Form = styled.form<{
   button {
     width: 36px;
     height: 36px;
-    background-color: black;
+    background-color: ${(props) =>
+      props.mode === "sql" ? "rgb(255, 127, 80)" : "black"};
     border: none;
     border-radius: 8px;
     cursor: pointer;

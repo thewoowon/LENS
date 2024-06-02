@@ -13,6 +13,7 @@ const LensChat = ({ chat }: LensChatProps) => {
           alignItems: "center",
           gap: "10px",
           fontWeight: "bold",
+          color: "#2E2E2E",
         }}
       >
         <svg

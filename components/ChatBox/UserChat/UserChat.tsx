@@ -1,6 +1,8 @@
 import styled from "@emotion/styled";
+import parse from "html-react-parser";
 
 type UserChatProps = {
+  // html일 경우 파싱이 필요한 경우가 있음
   chat: string;
 };
 
@@ -13,6 +15,7 @@ const UserChat = ({ chat }: UserChatProps) => {
           alignItems: "center",
           gap: "10px",
           fontWeight: "bold",
+          color: "#2E2E2E",
         }}
       >
         <svg
@@ -41,7 +44,7 @@ const UserChat = ({ chat }: UserChatProps) => {
         }}
       >
         {chat.split("\n").map((line, index) => (
-          <div key={index}>{line}</div>
+          <div key={index}>{parse(line)}</div>
         ))}
       </div>
     </Container>

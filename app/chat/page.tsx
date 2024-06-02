@@ -5,6 +5,7 @@ import SQLBlock from "@/components/SQLBlock";
 import TableBlock from "@/components/TableBlock";
 import { historyArray, SQLArray, tableArray } from "@/contants";
 import customAxios from "@/lib/axios";
+import { highlightSQL } from "@/utils/highlightSQL";
 import styled from "@emotion/styled";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -12,6 +13,8 @@ import { useForm } from "react-hook-form";
 type FormType = {
   chat: string;
 };
+
+export type Mode = "chat" | "sql" | "schema";
 
 const ChatPage = () => {
   const [chatContext, setChatContext] = useState<
@@ -25,6 +28,8 @@ const ChatPage = () => {
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const [mode, setMode] = useState<Mode>("sql");
+
   const { getValues, watch, setValue, handleSubmit, control } =
     useForm<FormType>({
       defaultValues: {
@@ -33,10 +38,14 @@ const ChatPage = () => {
     });
 
   const createChat = (chat: string) => {
+    // 여기서 sql 모드일 경우 특별한 처리를 해줘야 함
+    // SELECT, INSERT, UPDATE, DELETE 등의 키워드에 하이라이팅을 해줘야 함
+    // to html
+
     setChatContext([
       ...chatContext,
       {
-        chat,
+        chat: mode === "sql" ? highlightSQL(chat) : chat,
         role: "user",
       },
     ]);
@@ -44,7 +53,7 @@ const ChatPage = () => {
       setChatContext([
         ...chatContext,
         {
-          chat,
+          chat: mode === "sql" ? highlightSQL(chat) : chat,
           role: "user",
         },
         {
@@ -142,6 +151,8 @@ const ChatPage = () => {
             onSubmit={handleSubmit(onSubmit)}
             control={control}
             isLoading={isLoading}
+            mode={mode}
+            setMode={setMode}
           />
         </Wrapper>
       </ChatArea>
