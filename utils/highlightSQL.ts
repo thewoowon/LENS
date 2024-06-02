@@ -65,6 +65,9 @@ export const highlightSQL = (sql: string) => {
     );
   });
 
+  // 줄바꿈을 <br> 태그로 변환
+  highlightedSQL = highlightedSQL.replace(/\n/g, "<br>");
+
   // 최종적으로 <pre> 태그로 감싸서 리턴
   highlightedSQL = `<pre>${highlightedSQL}</pre>`;
 
