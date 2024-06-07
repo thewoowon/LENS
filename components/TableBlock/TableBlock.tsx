@@ -36,11 +36,18 @@ const TableBlock = ({
               style={{
                 fontWeight: "bold",
                 width: "50px",
+                color: "black",
               }}
             >
               TABLE
             </div>
-            <div>{name}</div>
+            <div
+              style={{
+                color: "black",
+              }}
+            >
+              {name}
+            </div>
           </div>
           <div
             style={{
@@ -54,11 +61,18 @@ const TableBlock = ({
               style={{
                 fontWeight: "bold",
                 width: "50px",
+                color: "black",
               }}
             >
               ALIAS
             </div>
-            <div>{alias}</div>
+            <div
+              style={{
+                color: "black",
+              }}
+            >
+              {alias}
+            </div>
           </div>
         </div>
         <div
@@ -72,11 +86,18 @@ const TableBlock = ({
             style={{
               fontWeight: "bold",
               width: "50px",
+              color: "black",
             }}
           >
             PK
           </div>
-          <div>{primaryKey}</div>
+          <div
+            style={{
+              color: "black",
+            }}
+          >
+            {primaryKey}
+          </div>
         </div>
         <div
           style={{
@@ -89,11 +110,18 @@ const TableBlock = ({
             style={{
               fontWeight: "bold",
               width: "50px",
+              color: "black",
             }}
           >
             FK
           </div>
-          <div>{foreignKey}</div>
+          <div
+            style={{
+              color: "black",
+            }}
+          >
+            {foreignKey}
+          </div>
         </div>
       </Info>
       <Cross
