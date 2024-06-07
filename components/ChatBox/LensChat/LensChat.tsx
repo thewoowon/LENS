@@ -2,9 +2,10 @@ import styled from "@emotion/styled";
 
 type LensChatProps = {
   chat: string;
+  data?: any[];
 };
 
-const LensChat = ({ chat }: LensChatProps) => {
+const LensChat = ({ chat, data }: LensChatProps) => {
   return (
     <Container>
       <div
@@ -51,6 +52,54 @@ const LensChat = ({ chat }: LensChatProps) => {
       >
         {chat}
       </div>
+      <table
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "10px",
+          padding: "0 10px",
+          width: "100%",
+          maxWidth: "1000px",
+          overflowX: "auto",
+          backgroundColor: "white",
+          border: "1px solid #E5E5E5",
+        }}
+      >
+        {data &&
+          data.map((row, idx1) => (
+            <tr
+              key={idx1}
+              style={{
+                display: "flex",
+                gap: "10px",
+                height: "50px",
+                borderBottom: "1px solid #E5E5E5",
+                overflowX: "auto",
+                overflowY: "hidden",
+              }}
+            >
+              {row.map((property: string, idx2: number) => (
+                <td
+                  key={idx2}
+                  style={{
+                    flex: "1",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "flex-start",
+                    width: "100px",
+                    overflowX: "auto",
+                    overflowY: "hidden",
+                    whiteSpace: "nowrap",
+                    textOverflow: "ellipsis",
+                    padding: "10px",
+                  }}
+                >
+                  <div>{property}</div>
+                </td>
+              ))}
+            </tr>
+          ))}
+      </table>
     </Container>
   );
 };

@@ -21,6 +21,7 @@ const ChatPage = () => {
     {
       chat: string;
       role: "user" | "lens";
+      data?: any[];
     }[]
   >([]);
   const [selectedTab, setSelectedTab] = useState<"table" | "SQL" | "history">(
@@ -37,38 +38,16 @@ const ChatPage = () => {
       },
     });
 
-  const createChat = (chat: string) => {
-    // 여기서 sql 모드일 경우 특별한 처리를 해줘야 함
-    // SELECT, INSERT, UPDATE, DELETE 등의 키워드에 하이라이팅을 해줘야 함
-    // to html
-
-    setChatContext([
-      ...chatContext,
-      {
-        chat: mode === "sql" ? highlightSQL(chat) : chat,
-        role: "user",
-      },
-    ]);
-    setTimeout(() => {
-      setChatContext([
-        ...chatContext,
-        {
-          chat: mode === "sql" ? highlightSQL(chat) : chat,
-          role: "user",
-        },
-        {
-          chat: "저는 렌즈입니다. 잠시만 기다려주세요.",
-          role: "lens",
-        },
-      ]);
-      setIsLoading(false);
-    }, 3000);
-  };
-
   const onSubmit = async (data: { chat: string }) => {
     setValue("chat", "");
     setIsLoading(true);
-    createChat(data.chat);
+    setChatContext([
+      ...chatContext,
+      {
+        chat: mode === "sql" ? highlightSQL(data.chat) : data.chat,
+        role: "user",
+      },
+    ]);
 
     const result = await customAxios("/api/query/execute_query", {
       method: "POST",
@@ -76,9 +55,25 @@ const ChatPage = () => {
         text: data.chat,
       },
     }).then((res) => {
-      const { data } = res;
-      setIsLoading(false);
+      return res.data;
     });
+
+    console.log(result);
+
+    setChatContext([
+      ...chatContext,
+      {
+        chat: mode === "sql" ? highlightSQL(data.chat) : data.chat,
+        role: "user",
+      },
+      {
+        chat: "쿼리 결과입니다.",
+        role: "lens",
+        data: result.data,
+      },
+    ]);
+
+    setIsLoading(false);
   };
 
   return (
@@ -140,11 +135,11 @@ const ChatPage = () => {
         <Wrapper>
           <ChatContext>
             {chatContext.map((context, index) => {
-              const { chat, role } = context;
+              const { chat, role, data } = context;
               if (role === "user") {
                 return <UserChat key={index} chat={chat} />;
               }
-              return <LensChat key={index} chat={chat} />;
+              return <LensChat key={index} chat={chat} data={data} />;
             })}
           </ChatContext>
           <ChatBox
