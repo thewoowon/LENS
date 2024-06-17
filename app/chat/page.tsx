@@ -7,7 +7,7 @@ import { historyArray, SQLArray, tableArray } from "@/contants";
 import customAxios from "@/lib/axios";
 import { highlightSQL } from "@/utils/highlightSQL";
 import styled from "@emotion/styled";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
 type FormType = {
@@ -17,6 +17,7 @@ type FormType = {
 export type Mode = "chat" | "sql" | "schema";
 
 const ChatPage = () => {
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [chatContext, setChatContext] = useState<
     {
       chat: string;
@@ -54,11 +55,26 @@ const ChatPage = () => {
       data: {
         text: data.chat,
       },
-    }).then((res) => {
-      return res.data;
-    });
+    })
+      .then((res) => {
+        return res.data;
+      })
+      .catch((error) => {
+        return error.response;
+      });
 
-    console.log(result);
+    if (result.status === 400) {
+      setChatContext([
+        ...chatContext,
+        {
+          chat: "쿼리 실행 중 오류가 발생했습니다.",
+          role: "lens",
+        },
+      ]);
+      setIsLoading(false);
+      console.log(result.data.detail);
+      return;
+    }
 
     setChatContext([
       ...chatContext,
@@ -75,6 +91,12 @@ const ChatPage = () => {
 
     setIsLoading(false);
   };
+
+  useEffect(() => {
+    setTimeout(() => {
+      scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  }, [chatContext]);
 
   return (
     <Container>
@@ -129,17 +151,22 @@ const ChatPage = () => {
       </LeftSide>
       <ChatArea>
         <Title>
-          고객 테이블에서 주문이 있는 고객 중, “배송 중”과 “배송 전” 상태인
-          고객만 추출해서 고객 ID별, 주문일자별로 주문가격을 ROLLUP해줘.
+          {mode === "sql"
+            ? "SQL 모드입니다."
+            : chatContext.length === 0
+              ? "채팅을 시작해보세요."
+              : chatContext[0].role === "user" && chatContext[0].chat}
         </Title>
         <Wrapper>
           <ChatContext>
             {chatContext.map((context, index) => {
               const { chat, role, data } = context;
               if (role === "user") {
-                return <UserChat key={index} chat={chat} />;
+                return <UserChat key={index} chat={chat} ref={scrollRef} />;
               }
-              return <LensChat key={index} chat={chat} data={data} />;
+              return (
+                <LensChat key={index} chat={chat} data={data} ref={scrollRef} />
+              );
             })}
           </ChatContext>
           <ChatBox
@@ -168,9 +195,13 @@ const LeftSide = styled.div`
   min-width: 350px;
   height: 100%;
   border-right: 1px solid #e5e5e5;
-  // 5개의 색상을 선형 그라디언트로 배경색을 지정
   background: linear-gradient(180deg, #f9f9f9 0%, #f0f0f0 100%);
   padding: 20px 30px;
+  transition: all 0.2s ease-in-out;
+
+  @media (max-width: 1000px) {
+    display: none;
+  }
 `;
 
 const ChatArea = styled.div`

@@ -1,14 +1,15 @@
 import styled from "@emotion/styled";
 import parse from "html-react-parser";
+import { forwardRef } from "react";
 
 type UserChatProps = {
   // html일 경우 파싱이 필요한 경우가 있음
   chat: string;
 };
 
-const UserChat = ({ chat }: UserChatProps) => {
+const UserChat = forwardRef<HTMLDivElement, UserChatProps>(({ chat }, ref) => {
   return (
-    <Container>
+    <Container ref={ref}>
       <div
         style={{
           display: "flex",
@@ -49,9 +50,11 @@ const UserChat = ({ chat }: UserChatProps) => {
       </div>
     </Container>
   );
-};
+});
 
 export default UserChat;
+
+UserChat.displayName = "UserChat";
 
 const Container = styled.div`
   display: flex;

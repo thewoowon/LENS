@@ -7,8 +7,6 @@ const customAxios = axios.create({
   baseURL: "https://api.lensql.chat",
   headers: {
     "Content-Type": "application/json",
-    // access_token: localStorage.getItem("accessToken") || "",
-    // refresh_token: localStorage.getItem("refreshToken") || "",
   },
 });
 

@@ -7,7 +7,6 @@ const OAuthLogin = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleGoogle = async () => {
-    return;
     const response = await axios(`${window.location.origin}/api/auth/login`, {
       method: "GET",
     }).then((res) => res.data);
