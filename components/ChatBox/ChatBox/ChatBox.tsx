@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import styled from "@emotion/styled";
 import { Controller, Control } from "react-hook-form";
-import { COLORS } from "@/styles/colors";
 import { debounce } from "lodash";
 import { Mode } from "@/app/chat/page";
+import { toast } from "react-toastify";
 
 type ChatBoxProps = {
   onSubmit: () => void;
@@ -232,9 +232,14 @@ const ChatBox = ({
           <ListItem
             key={item.mode}
             onClick={() => {
+              if (item.mode === "schema") {
+                toast.warn("스키마 모드는 준비 중입니다.");
+                return;
+              }
               setMode(item.mode as Mode);
               onClose && onClose();
             }}
+            disabled={item.mode === "schema"}
           >
             <div
               style={{
@@ -432,7 +437,7 @@ const Utils = styled.div<{
     `}
 `;
 
-const ListItem = styled.div`
+const ListItem = styled.div<{ disabled: boolean }>`
   width: 100%;
   display: flex;
   justify-content: flex-start;
@@ -444,6 +449,12 @@ const ListItem = styled.div`
   &:last-child {
     border-bottom: none;
   }
+  ${(props) =>
+    props.disabled &&
+    `
+    opacity: 0.5;
+    cursor: not-allowed;
+  `}
 
   &:hover {
     background-color: #f5f5f5;

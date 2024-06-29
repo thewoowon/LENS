@@ -69,6 +69,8 @@ const LensChat = forwardRef<HTMLDivElement, LensChatProps>(
           }}
         >
           {data &&
+            Array.isArray(data) &&
+            data.length > 0 &&
             data.map((row, idx1) => (
               <tr
                 key={idx1}

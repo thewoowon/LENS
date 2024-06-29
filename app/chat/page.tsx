@@ -6,9 +6,11 @@ import TableBlock from "@/components/TableBlock";
 import { historyArray, SQLArray, tableArray } from "@/contants";
 import customAxios from "@/lib/axios";
 import { highlightSQL } from "@/utils/highlightSQL";
+import { isValidJson } from "@/utils/isValidJson";
 import styled from "@emotion/styled";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 type FormType = {
   chat: string;
@@ -50,44 +52,112 @@ const ChatPage = () => {
       },
     ]);
 
-    const result = await customAxios("/api/query/execute_query", {
-      method: "POST",
-      data: {
-        text: data.chat,
-      },
-    })
-      .then((res) => {
-        return res.data;
-      })
-      .catch((error) => {
-        return error.response;
-      });
+    if (mode === "sql") {
+      try {
+        const result = await customAxios("/api/query/execute_query", {
+          method: "POST",
+          data: {
+            text: data.chat,
+          },
+        })
+          .then((res) => {
+            return res.data;
+          })
+          .catch((error) => {
+            return error.response;
+          });
 
-    if (result.status === 400) {
+        if (result.status === 400) {
+          setChatContext([
+            ...chatContext,
+            {
+              chat: "쿼리 실행 중 오류가 발생했습니다.",
+              role: "lens",
+            },
+          ]);
+          setIsLoading(false);
+          console.log(result.data.detail);
+          return;
+        }
+
+        setChatContext([
+          ...chatContext,
+          {
+            chat: mode === "sql" ? highlightSQL(data.chat) : data.chat,
+            role: "user",
+          },
+          {
+            chat: "쿼리 결과입니다.",
+            role: "lens",
+            data: result.data,
+          },
+        ]);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    } else if (mode === "chat") {
+      try {
+        const response = await fetch("/api/stream", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            prompt: data.chat,
+          }),
+        });
+
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let result = "";
+
+        while (true) {
+          const { done, value } = (await reader?.read()) ?? {};
+          if (done) break;
+          result += decoder.decode(value, { stream: true });
+          setChatContext([
+            ...chatContext,
+            {
+              chat: data.chat,
+              role: "user",
+            },
+            {
+              chat: "쿼리 실행 중입니다.",
+              role: "lens",
+              data: isValidJson(result) ? JSON.parse(result) : [],
+            },
+          ]);
+        }
+        console.log(result);
+        console.log(isValidJson(result));
+        console.log(JSON.parse(result));
+      } catch (error) {
+        console.error("스트림 통신 중에 에러가 발생했어요.", error);
+        toast.error("스트림 통신 중에 에러가 발생했어요.");
+        setChatContext([
+          ...chatContext,
+          {
+            chat: "쿼리 실행 중 오류가 발생했습니다.",
+            role: "lens",
+          },
+        ]);
+        setIsLoading(false);
+        return;
+      }
+    } else {
       setChatContext([
         ...chatContext,
         {
-          chat: "쿼리 실행 중 오류가 발생했습니다.",
+          chat: data.chat,
+          role: "user",
+        },
+        {
+          chat: "스키마는 준비 중입니다.",
           role: "lens",
+          data: [],
         },
       ]);
-      setIsLoading(false);
-      console.log(result.data.detail);
-      return;
     }
-
-    setChatContext([
-      ...chatContext,
-      {
-        chat: mode === "sql" ? highlightSQL(data.chat) : data.chat,
-        role: "user",
-      },
-      {
-        chat: "쿼리 결과입니다.",
-        role: "lens",
-        data: result.data,
-      },
-    ]);
 
     setIsLoading(false);
   };

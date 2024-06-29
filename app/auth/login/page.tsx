@@ -18,7 +18,7 @@ const Container = styled.main`
   height: 100vh;
   padding: 56px 0 0 0;
   width: 100%;
-  background-color: #f5f5f5;
+  background-color: black;
   justify-content: center;
   align-items: center;
   flex-direction: column;

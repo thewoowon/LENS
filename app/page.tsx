@@ -385,7 +385,7 @@ const Button = styled.button`
   background: linear-gradient(180deg, #ffffff 0%, #e1ffe1 100%);
   border: none;
   color: #333333;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   cursor: pointer;
   padding: 16px 32px;
@@ -397,19 +397,19 @@ const Button = styled.button`
   }
 
   @media (max-width: 1440px) {
-    font-size: 20px;
-  }
-
-  @media (max-width: 1200px) {
     font-size: 18px;
   }
 
-  @media (max-width: 1000px) {
+  @media (max-width: 1200px) {
     font-size: 16px;
   }
 
-  @media (max-width: 700px) {
+  @media (max-width: 1000px) {
     font-size: 14px;
+  }
+
+  @media (max-width: 700px) {
+    font-size: 12px;
   }
 `;
 
