@@ -8,6 +8,7 @@ type LensChatProps = {
 
 const LensChat = forwardRef<HTMLDivElement, LensChatProps>(
   ({ chat, data }, ref) => {
+    console.log(data);
     return (
       <Container ref={ref}>
         <div
@@ -71,6 +72,43 @@ const LensChat = forwardRef<HTMLDivElement, LensChatProps>(
           {data &&
             Array.isArray(data) &&
             data.length > 0 &&
+            data.slice(0, 1).map((row, idx1) => (
+              <thead
+                key={idx1}
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  height: "50px",
+                  borderBottom: "1px solid #E5E5E5",
+                  overflowX: "auto",
+                  overflowY: "hidden",
+                }}
+              >
+                {Object.keys(row).map((key: string, idx2: number) => (
+                  <td
+                    key={idx2}
+                    style={{
+                      flex: "1",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "flex-start",
+                      width: "100px",
+                      overflowX: "auto",
+                      overflowY: "hidden",
+                      whiteSpace: "nowrap",
+                      textOverflow: "ellipsis",
+                      padding: "10px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    <div>{key}</div>
+                  </td>
+                ))}
+              </thead>
+            ))}
+          {data &&
+            Array.isArray(data) &&
+            data.length > 0 &&
             data.map((row, idx1) => (
               <tr
                 key={idx1}
@@ -83,7 +121,7 @@ const LensChat = forwardRef<HTMLDivElement, LensChatProps>(
                   overflowY: "hidden",
                 }}
               >
-                {row.map((property: string, idx2: number) => (
+                {Object.keys(row).map((key: string, idx2: number) => (
                   <td
                     key={idx2}
                     style={{
@@ -99,7 +137,7 @@ const LensChat = forwardRef<HTMLDivElement, LensChatProps>(
                       padding: "10px",
                     }}
                   >
-                    <div>{property}</div>
+                    <div>{row[key]}</div>
                   </td>
                 ))}
               </tr>
