@@ -30,6 +30,8 @@ export async function POST(req: NextRequest) {
       throw new Error("No response body");
     }
 
+    console.log("Response status:", response);
+
     const stream = new ReadableStream({
       start(controller) {
         const reader = response.body?.getReader();

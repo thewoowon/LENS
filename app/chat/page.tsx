@@ -122,9 +122,8 @@ const ChatPage = () => {
               role: "user",
             },
             {
-              chat: "쿼리 실행 중입니다.",
+              chat: result,
               role: "lens",
-              data: isValidJson(result) ? JSON.parse(result) : [],
             },
           ]);
         }
