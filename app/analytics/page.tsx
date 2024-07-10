@@ -2,15 +2,15 @@
 
 import styled from "@emotion/styled";
 
-const UploadPage = () => {
+const AnalyticsPage = () => {
   return (
     <Container>
-      <h1>Upload Page</h1>
+      <h1>Analytics Page</h1>
     </Container>
   );
 };
 
-export default UploadPage;
+export default AnalyticsPage;
 
 const Container = styled.main`
   display: flex;

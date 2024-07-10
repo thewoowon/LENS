@@ -28,7 +28,7 @@ const ChatPage = () => {
     }[]
   >([]);
   const [selectedTab, setSelectedTab] = useState<"table" | "SQL" | "history">(
-    "table"
+    "history"
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -172,6 +172,14 @@ const ChatPage = () => {
       <LeftSide>
         <Tabs>
           <Tab
+            selected={selectedTab === "history"}
+            onClick={() => {
+              setSelectedTab("history");
+            }}
+          >
+            히스토리
+          </Tab>
+          <Tab
             selected={selectedTab === "table"}
             onClick={() => {
               setSelectedTab("table");
@@ -187,15 +195,14 @@ const ChatPage = () => {
           >
             SQL
           </Tab>
-          <Tab
-            selected={selectedTab === "history"}
-            onClick={() => {
-              setSelectedTab("history");
-            }}
-          >
-            히스토리
-          </Tab>
         </Tabs>
+        {selectedTab === "history" && (
+          <div>
+            {historyArray.map((history, index) => {
+              return <HistoryBlock key={index} {...history} />;
+            })}
+          </div>
+        )}
         {selectedTab === "table" && (
           <div>
             {tableArray.map((table, index) => {
@@ -207,13 +214,6 @@ const ChatPage = () => {
           <div>
             {SQLArray.map((sql, index) => {
               return <SQLBlock key={index} sql={sql} />;
-            })}
-          </div>
-        )}
-        {selectedTab === "history" && (
-          <div>
-            {historyArray.map((history, index) => {
-              return <HistoryBlock key={index} {...history} />;
             })}
           </div>
         )}
@@ -325,7 +325,6 @@ const Tab = styled.div<{
     color 0.2s ease-in-out;
   &:hover {
     color: black;
-    text-decoration: underline;
   }
 `;
 

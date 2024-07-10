@@ -3,14 +3,16 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Drawer from "@mui/material/Drawer";
-import { Box } from "@mui/material";
+import { Box, ListItem } from "@mui/material";
+import useAuthStore from "@/store/useAuthStore";
 
 const Header = () => {
   const router = useRouter();
   const pathName = usePathname();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isLoggedIn, login, logout, } = useAuthStore();
 
   const [open, setOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   const toggleDrawer = (event: React.KeyboardEvent | React.MouseEvent) => {
     if (
@@ -28,9 +30,9 @@ const Header = () => {
     const getAccessToken = async () => {
       const accessToken = localStorage.getItem("accessToken");
       if (accessToken) {
-        setIsLoggedIn(true);
+        login();
       } else {
-        setIsLoggedIn(false);
+        logout();
       }
     };
 
@@ -115,22 +117,30 @@ const Header = () => {
                 // router.push("/upload");
               }}
             >
-              업로드
+              애널리틱스
             </NavItem>
           </Nav>
         </div>
         <Login
           onClick={() => {
             if (isLoggedIn) {
-              localStorage.removeItem("accessToken");
-              setIsLoggedIn(false);
-              toast.info("로그아웃 되었습니다.");
+              setProfileOpen(!profileOpen);
             } else {
               router.push("/auth/login");
             }
           }}
         >
-          {isLoggedIn ? "로그아웃" : "로그인"}
+          {isLoggedIn ? <Profile>
+            <svg width={"28px"} height={"28px"} version="1.1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#FFFFFF"><g id="info" /><g id="icons"><g id="user"><ellipse cx="12" cy="8" rx="5" ry="6" /><path d="M21.8,19.1c-0.9-1.8-2.6-3.3-4.8-4.2c-0.6-0.2-1.3-0.2-1.8,0.1c-1,0.6-2,0.9-3.2,0.9s-2.2-0.3-3.2-0.9    C8.3,14.8,7.6,14.7,7,15c-2.2,0.9-3.9,2.4-4.8,4.2C1.5,20.5,2.6,22,4.1,22h15.8C21.4,22,22.5,20.5,21.8,19.1z" /></g></g></svg>
+          </Profile> : "로그인"}
+          <ModalBox open={profileOpen} onClose={() => {
+            setProfileOpen(false);
+          }
+          } logout={() => {
+            localStorage.removeItem("accessToken");
+            logout();
+            toast.info("로그아웃 되었습니다.");
+          }} />
         </Login>
         <HamburgerMenu
           onClick={(e) => {
@@ -182,7 +192,7 @@ const Header = () => {
             {[
               { name: "채팅", url: "/chat" },
               { name: "스키마", url: "/schema" },
-              { name: "업로드", url: "/upload" },
+              { name: "애널리틱스", url: "/analytics" },
             ].map((item, index) => (
               <NavItem
                 key={index}
@@ -199,7 +209,7 @@ const Header = () => {
               onClick={() => {
                 if (isLoggedIn) {
                   localStorage.removeItem("accessToken");
-                  setIsLoggedIn(false);
+                  logout();
                   toast.info("로그아웃 되었습니다.");
                 } else {
                   router.push("/auth/login");
@@ -217,6 +227,54 @@ const Header = () => {
 };
 
 export default Header;
+
+const ModalBox = ({
+  open,
+  onClose,
+  logout,
+}: {
+  open?: boolean;
+  onClose?: () => void;
+  logout?: () => void;
+}) => {
+  const router = useRouter();
+  if (!open) return null;
+  return (
+    <ModalContainer>
+      {[
+        { mode: "chat", label: "채팅" },
+        { mode: "mypage", label: "마이페이지" },
+        { mode: "logout", label: "로그아웃" },
+      ].map((item) => (
+        <ListItem
+          sx={{
+            width: "100%",
+            cursor: "pointer",
+            "&:hover": {
+              backgroundColor: "#333333",
+            },
+          }}
+          key={item.mode}
+          onClick={() => {
+            if (item.mode === "logout") {
+              localStorage.removeItem("accessToken");
+              localStorage.removeItem("refreshToken");
+              logout && logout();
+              onClose && onClose();
+            } else if (item.mode === "mypage") {
+              router.push("/mypage");
+            } else {
+              router.push("/chat");
+            }
+          }}
+        >
+
+          {item.label}
+        </ListItem>
+      ))}
+    </ModalContainer>
+  );
+};
 
 const Container = styled.header`
   display: flex;
@@ -281,6 +339,7 @@ const NavItem = styled.div<{
 `;
 
 const Login = styled.div`
+  position: relative;
   font-size: 1rem;
   font-weight: 400;
   cursor: pointer;
@@ -316,4 +375,39 @@ const HamburgerMenu = styled.div`
     display: block;
     font-size: 1.5rem;
   }
+`;
+
+
+const Profile = styled.div`
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+
+  &:hover {
+    background-color: #333333;
+  }
+`;
+
+const ModalContainer = styled.div`
+  position: absolute;
+  top: 40px;
+  right: calc(50% - 50px);
+  width: 100px;
+  height: fit-content;
+  background-color: black;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  box-shadow: 0px 2px 2px 2px rgba(255, 255, 255, 0.2);
+  font-size: 0.8rem;
 `;

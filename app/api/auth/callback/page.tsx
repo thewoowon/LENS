@@ -1,5 +1,6 @@
 "use client";
 
+import useAuthStore from "@/store/useAuthStore";
 import styled from "@emotion/styled";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -7,6 +8,8 @@ import { useEffect } from "react";
 
 const CallbackPage = () => {
   const router = useRouter();
+  const { isLoggedIn, login, logout, } = useAuthStore();
+
 
   useEffect(() => {
     const getQueryParams = (): { [key: string]: string } => {
@@ -35,11 +38,12 @@ const CallbackPage = () => {
 
       localStorage.setItem("accessToken", result["access_token"]);
       localStorage.setItem("refreshToken", result["refresh_token"]);
+      login();
       router.push("/");
     };
 
     handleGoogle();
-  }, [router]);
+  }, [router, login]);
 
   return (
     <Container>
