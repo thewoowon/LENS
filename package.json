@@ -38,13 +38,15 @@
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
     "lodash": "^4.17.21",
-    "next": "14.2.3",
+    "next": "^14.2.5",
     "next-seo": "^6.5.0",
     "next-sitemap": "^4.2.3",
-    "react": "^18",
-    "react-dom": "^18",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-hook-form": "^7.51.4",
+    "react-intersection-observer": "^9.10.3",
     "react-toastify": "^10.0.5",
+    "sharp": "^0.33.4",
     "zustand": "^4.5.2"
   },
   "devDependencies": {
@@ -71,8 +73,8 @@
     ]
   },
   "resolutions": {
-    "strip-ansi": "6.0.1",
-    "string-width": "4.2.2",
-    "wrap-ansi": "7.0.0"
+    "wrap-ansi": "^9.0.0",
+    "string-width": "^7.0.0",
+    "strip-ansi": "^7.1.0"
   }
 }
