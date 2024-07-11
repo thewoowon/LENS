@@ -129,7 +129,7 @@ export default function Home() {
         <Fader />
         <PurpleGradient />
         <Noise>
-          <div></div>
+          <div />
         </Noise>
         <div
           style={{
@@ -157,7 +157,7 @@ export default function Home() {
             alignItems: "center",
             justifyContent: "center",
             position: "relative",
-            zIndex: 2,
+            zIndex: 10,
             gap: "40px",
             marginBottom: "120px",
           }}
@@ -208,7 +208,7 @@ export default function Home() {
             alignItems: "center",
             justifyContent: "center",
             position: "relative",
-            zIndex: 2,
+            zIndex: 10,
           }}
         >
           <motion.div
@@ -233,17 +233,30 @@ export default function Home() {
       </Section>
       <Section>
         <ScrollAnimation>
-          <motion.div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
-              gridTemplateRows: "repeat(2, 1fr)",
-              gap: "20px",
-              width: "100%",
-              maxWidth: "1200px",
-              margin: "0 auto",
-              padding: "20px",
-            }}
+          <Grid sx={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4, 1fr)",
+            gridTemplateRows: "repeat(2, 1fr)",
+            gap: "20px",
+            width: "100%",
+            maxWidth: "1200px",
+            margin: "0 auto",
+            padding: "20px",
+
+            "@media (max-width: 1440px)": {
+              gridTemplateColumns: "repeat(3, 1fr)",
+            },
+
+            "@media (max-width: 1024px)": {
+              gridTemplateColumns: "repeat(2, 1fr)",
+              gap: "60px",
+            },
+
+            "@media (max-width: 768px)": {
+              gridTemplateColumns: "repeat(1, 1fr)",
+              gap: "80px",
+            },
+          }}
           >
             {[
               AliExpress,
@@ -269,7 +282,7 @@ export default function Home() {
                 </div>
               );
             })}
-          </motion.div>
+          </Grid>
         </ScrollAnimation>
       </Section>
       <Section>
@@ -281,10 +294,18 @@ export default function Home() {
             justifyContent: "center",
           }}>
             <Typography
-              style={{
+              sx={{
                 fontSize: "44px",
                 marginBottom: "40px",
                 fontWeight: "bolder",
+
+                "@media (max-width: 1440px)": {
+                  fontSize: "40px",
+                },
+
+                "@media (max-width: 768px)": {
+                  fontSize: "36px",
+                },
               }}
             >
               SQL로 데이터를 분석하는{" "}
@@ -299,7 +320,18 @@ export default function Home() {
               </span>
               가 되는 길
             </Typography>
-            <Typography variant="body1" textAlign={"center"} lineHeight={"28px"}>
+            <Typography variant="body1" textAlign={"center"} lineHeight={"28px"} sx={{
+              fontSize: "20px",
+              fontWeight: "light",
+              marginBottom: "40px",
+              "@media (max-width: 1440px)": {
+                fontSize: "16px",
+              },
+              "@media (max-width: 768px)": {
+                fontSize: "14px",
+              },
+
+            }}>
               SQL로 데이터 분석의 신이 되어 프로 일잘러로 거듭나는 방법이 여기
               있었네요. <br />
               여러분! 이제 더 이상 두려워하지 마세요. 복잡한 데이터도 LENS와
@@ -398,10 +430,18 @@ export default function Home() {
             justifyContent: "center",
           }}>
             <Typography
-              style={{
+              sx={{
                 fontSize: "44px",
                 marginBottom: "40px",
                 fontWeight: "bolder",
+
+                "@media (max-width: 1440px)": {
+                  fontSize: "40px",
+                },
+
+                "@media (max-width: 768px)": {
+                  fontSize: "36px",
+                },
               }}
             >
               LENS를 사용해야 하는 이유
@@ -416,7 +456,7 @@ export default function Home() {
                 gridTemplateColumns: "repeat(2, 1fr)",
               },
 
-              "@media (max-width: 700px)": {
+              "@media (max-width: 768px)": {
                 gridTemplateColumns: "repeat(1, 1fr)",
               },
             }}>
