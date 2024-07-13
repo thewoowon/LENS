@@ -1,4 +1,4 @@
-import customAxios from "@/lib/axios";
+import axios from "axios";
 import { google } from "googleapis";
 
 export async function POST(req: Request) {
@@ -27,10 +27,15 @@ export async function POST(req: Request) {
   };
 
   // 서버에 요청 필요
-  const result = await customAxios({
+  const result = await axios({
+    withCredentials: true,
+    baseURL: process.env.NEXT_PUBLIC_API_URL,
+    headers: {
+      "Content-Type": "application/json",
+    },
     method: "POST",
-    url: "/api/login",
-    data: user,
+    url: "/v1/user/login",
+    data: JSON.stringify(user),
   }).then((res) => res.data);
 
   return new Response(JSON.stringify(result), {

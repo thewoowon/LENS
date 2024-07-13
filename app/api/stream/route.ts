@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   const { prompt } = await req.json();
   try {
     const response = await fetchWithTimeout(
-      "https://api.lensql.chat/api/llm/execute_llm",
+      "https://api.lensql.chat/v1/llm/execute_llm",
       {
         method: "POST",
         headers: {
@@ -29,8 +29,6 @@ export async function POST(req: NextRequest) {
     if (!response.body) {
       throw new Error("No response body");
     }
-
-    console.log("Response status:", response);
 
     const stream = new ReadableStream({
       start(controller) {
