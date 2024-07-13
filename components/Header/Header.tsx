@@ -253,6 +253,9 @@ const ModalBox = ({
             "&:hover": {
               backgroundColor: "#333333",
             },
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
           }}
           key={item.mode}
           onClick={() => {
@@ -408,6 +411,7 @@ const ModalContainer = styled.div`
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  box-shadow: 0px 2px 2px 2px rgba(255, 255, 255, 0.2);
   font-size: 0.8rem;
+  overflow: hidden;
+  border: 1px solid #333333;
 `;

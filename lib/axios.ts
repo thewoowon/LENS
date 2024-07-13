@@ -4,7 +4,7 @@ import axios from "axios";
 const customAxios = axios.create({
   withCredentials: true, // CORS 요청 시 인증 정보를 전송하도록 설정
   // 기타 필요한 기본 설정 추가
-  baseURL: "https://api.lensql.chat",
+  baseURL: "http://localhost:8000",
   headers: {
     "Content-Type": "application/json",
   },
@@ -13,7 +13,7 @@ const customAxios = axios.create({
 // Request interceptor to add access token to headers
 customAxios.interceptors.request.use(
   (config) => {
-    const accessToken = localStorage.getItem("access_token");
+    const accessToken = localStorage.getItem("accessToken");
     if (accessToken) {
       config.headers["Authorization"] = `Bearer ${accessToken}`;
     }
@@ -29,6 +29,7 @@ customAxios.interceptors.response.use(
     return response;
   },
   async (error) => {
+    console.error("Error fetching data:", error);
     const originalRequest = error.config;
     const refreshToken = localStorage.getItem("refresh_token");
 
@@ -47,7 +48,7 @@ customAxios.interceptors.response.use(
         );
 
         const { access_token } = response.data;
-        localStorage.setItem("access_token", access_token);
+        localStorage.setItem("accessToken", access_token);
 
         // Update the Authorization header and retry the original request
         originalRequest.headers["Authorization"] = `Bearer ${access_token}`;
@@ -55,11 +56,14 @@ customAxios.interceptors.response.use(
       } catch (refreshError) {
         // Handle token refresh errors, e.g., logout user
         console.error("Refresh token is invalid or expired", refreshError);
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
         window.location.href = "/login";
         return Promise.reject(refreshError);
       }
+    } else {
+      // 401이면 다시 로그인
+
     }
     return Promise.reject(error);
   }

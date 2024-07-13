@@ -8,7 +8,6 @@ type LensChatProps = {
 
 const LensChat = forwardRef<HTMLDivElement, LensChatProps>(
   ({ chat, data }, ref) => {
-    console.log(data);
     return (
       <Container ref={ref}>
         <div

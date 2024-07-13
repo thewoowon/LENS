@@ -3,7 +3,6 @@ import { ChatBox, LensChat, UserChat } from "@/components/ChatBox";
 import HistoryBlock from "@/components/HistoryBlock";
 import SQLBlock from "@/components/SQLBlock";
 import TableBlock from "@/components/TableBlock";
-import { historyArray, SQLArray, tableArray } from "@/contants";
 import customAxios from "@/lib/axios";
 import { highlightSQL } from "@/utils/highlightSQL";
 import { isValidJson } from "@/utils/isValidJson";
@@ -30,6 +29,9 @@ const ChatPage = () => {
   const [selectedTab, setSelectedTab] = useState<"table" | "SQL" | "history">(
     "history"
   );
+  const [chatHistory, setChatHistory] = useState<MessageType[]>([]);
+  const [tableArray, setTableArray] = useState<TableType[]>([]);
+  const [SQLArray, setSQLArray] = useState<MessageType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [mode, setMode] = useState<Mode>("sql");
@@ -54,7 +56,7 @@ const ChatPage = () => {
 
     if (mode === "sql") {
       try {
-        const result = await customAxios("/api/query/execute_query", {
+        const result = await customAxios("/v1/query/execute_query", {
           method: "POST",
           data: {
             text: data.chat,
@@ -76,7 +78,6 @@ const ChatPage = () => {
             },
           ]);
           setIsLoading(false);
-          console.log(result.data.detail);
           return;
         }
 
@@ -127,11 +128,7 @@ const ChatPage = () => {
             },
           ]);
         }
-        console.log(result);
-        console.log(isValidJson(result));
-        console.log(JSON.parse(result));
       } catch (error) {
-        console.error("스트림 통신 중에 에러가 발생했어요.", error);
         toast.error("스트림 통신 중에 에러가 발생했어요.");
         setChatContext([
           ...chatContext,
@@ -167,6 +164,62 @@ const ChatPage = () => {
     }, 100);
   }, [chatContext]);
 
+  useEffect(() => {
+    // params.sessionId를 통해서 -> 챗 히스토리
+    const getChatHistory = async () => {
+      try {
+        const response = await customAxios(`/v1/history/get_history`, {
+          method: "GET",
+        });
+
+        const { data } = response;
+        setChatHistory(data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    }
+
+    getChatHistory();
+  }, [])
+
+  useEffect(() => {
+    // params.sessionId를 통해서 -> 테이블 정보
+    const getTableArray = async () => {
+      try {
+        const response = await customAxios(`/v1/table/get_table_list`, {
+          method: "GET",
+        });
+
+        const { data } = response;
+        setTableArray(data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    }
+
+    getTableArray();
+  }, [])
+
+  useEffect(() => {
+    // params.sessionId를 통해서 -> SQL 히스토리
+    const getSQLArray = async () => {
+      try {
+        const response = await customAxios(`/v1/history/get_sql_history`, {
+          method: "GET",
+        });
+
+        const { data } = response;
+        setSQLArray(data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    }
+
+    getSQLArray();
+  }, [])
+
+  // 메세지를 시작한다면....
+
   return (
     <Container>
       <LeftSide>
@@ -197,25 +250,25 @@ const ChatPage = () => {
           </Tab>
         </Tabs>
         {selectedTab === "history" && (
-          <div>
-            {historyArray.map((history, index) => {
-              return <HistoryBlock key={index} {...history} />;
+          <LeftScrollWrapper>
+            {chatHistory.map((history, index) => {
+              return <HistoryBlock key={index} history={history} />;
             })}
-          </div>
+          </LeftScrollWrapper>
         )}
         {selectedTab === "table" && (
-          <div>
+          <LeftScrollWrapper>
             {tableArray.map((table, index) => {
-              return <TableBlock key={index} {...table} />;
+              return <TableBlock key={index} table={table} />;
             })}
-          </div>
+          </LeftScrollWrapper>
         )}
         {selectedTab === "SQL" && (
-          <div>
+          <LeftScrollWrapper>
             {SQLArray.map((sql, index) => {
               return <SQLBlock key={index} sql={sql} />;
             })}
-          </div>
+          </LeftScrollWrapper>
         )}
       </LeftSide>
       <ChatArea>
@@ -261,12 +314,15 @@ const Container = styled.main`
 `;
 
 const LeftSide = styled.div`
-  min-width: 350px;
+  min-width: 300px;
+  max-width: 350px;
   height: 100%;
   border-right: 1px solid #e5e5e5;
   background: linear-gradient(180deg, #f9f9f9 0%, #f0f0f0 100%);
   padding: 20px 30px;
   transition: all 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
 
   @media (max-width: 1000px) {
     display: none;
@@ -344,6 +400,18 @@ const Wrapper = styled.div`
   width: 100%;
   justify-content: space-between;
   padding: 45px 40px 36px 40px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+`;
+
+const LeftScrollWrapper = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;

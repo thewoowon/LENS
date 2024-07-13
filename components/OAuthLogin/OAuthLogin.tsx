@@ -62,7 +62,7 @@ const OAuthLogin = () => {
           </div>
         ) : (
           <div className="py-[36px] w-[400px] flex flex-col items-center gap-[36px]">
-            <div className="text-[24px] font-semibold text-white">
+            <div className="text-[16px] font-semibold text-white laptop:text-[20px] tablet:text-[16px]">
               로그인이 필요합니다
             </div>
             <ButtonBig
@@ -75,7 +75,9 @@ const OAuthLogin = () => {
                   <div className="w-[24px] h-[24px] border-[2px] border-[white] border-dashed rounded-full animate-spin"></div>
                 ) : (
                   <svg
-                    enable-background="new 0 0 24 24"
+                    width={24}
+                    height={24}
+                    enableBackground="new 0 0 24 24"
                     id="Layer_1"
                     version="1.1"
                     viewBox="0 0 24 24"
@@ -178,7 +180,6 @@ const Wrapper = styled.div`
   height: fit-content;
   width: 100%;
   max-width: 400px;
-  background-color: #121212;
   justify-content: center;
   align-items: flex-start;
   border-radius: 10px;
@@ -190,15 +191,16 @@ const Wrapper = styled.div`
 const ButtonBig = styled.button`
   border-radius: 0.25rem;
   padding: 0.75rem 1rem;
-  font-size: 1.3rem;
+  font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   width: 100%;
   max-width: 350px;
   color: white;
+  background-color: #1e1e1e;
 
   &:hover {
     transform: scale(1.05);
-    background-color: #1e1e1e;
+    background-color: #2e2e2e;
   }
 `;
