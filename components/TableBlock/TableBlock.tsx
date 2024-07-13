@@ -2,17 +2,11 @@ import styled from "@emotion/styled";
 import { toast } from "react-toastify";
 
 type TableBlockProps = {
-  name: string;
-  alias: string;
-  primaryKey: string;
-  foreignKey: string;
+  table: TableType;
 };
 
 const TableBlock = ({
-  name,
-  alias,
-  primaryKey,
-  foreignKey,
+  table
 }: TableBlockProps) => {
   return (
     <Container>
@@ -22,57 +16,24 @@ const TableBlock = ({
             display: "flex",
             justifyContent: "flex-start",
             alignItems: "center",
-            gap: "24px",
+            borderBottom: "1px solid #f1f1f1",
           }}
         >
           <div
             style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
+              fontWeight: "bold",
+              width: "50px",
+              color: "black",
             }}
           >
-            <div
-              style={{
-                fontWeight: "bold",
-                width: "50px",
-                color: "black",
-              }}
-            >
-              TABLE
-            </div>
-            <div
-              style={{
-                color: "black",
-              }}
-            >
-              {name}
-            </div>
+            TABLE
           </div>
           <div
             style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: "8px",
+              color: "black",
             }}
           >
-            <div
-              style={{
-                fontWeight: "bold",
-                width: "50px",
-                color: "black",
-              }}
-            >
-              ALIAS
-            </div>
-            <div
-              style={{
-                color: "black",
-              }}
-            >
-              {alias}
-            </div>
+            {table.table_name}
           </div>
         </div>
         <div
@@ -80,6 +41,7 @@ const TableBlock = ({
             display: "flex",
             justifyContent: "flex-start",
             alignItems: "center",
+            borderBottom: "1px solid #f1f1f1",
           }}
         >
           <div
@@ -96,32 +58,48 @@ const TableBlock = ({
               color: "black",
             }}
           >
-            {primaryKey}
+            {table.primary_key.join(", ")}
           </div>
         </div>
         <div
           style={{
             display: "flex",
             justifyContent: "flex-start",
-            alignItems: "center",
+            alignItems: "flex-start",
+            flexDirection: "column",
           }}
         >
-          <div
-            style={{
-              fontWeight: "bold",
-              width: "50px",
-              color: "black",
-            }}
-          >
-            FK
-          </div>
-          <div
-            style={{
-              color: "black",
-            }}
-          >
-            {foreignKey}
-          </div>
+          {
+            table.foreign_keys?.length > 0 && (
+              table.foreign_keys.map((fk, index) => (
+                <div
+                  key={index}
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontWeight: "bold",
+                      width: "50px",
+                      color: "black",
+                    }}
+                  >
+                    FK
+                  </div>
+                  <div
+                    style={{
+                      color: "black",
+                    }}
+                  >
+                    {fk}
+                  </div>
+                </div>
+              ))
+            )
+          }
         </div>
       </Info>
       <Cross
@@ -150,11 +128,11 @@ export default TableBlock;
 
 const Container = styled.div`
   display: flex;
-  margin: 20px 0;
+  margin-bottom: 10px;
   background-color: white;
   border-radius: 8px;
   padding: 12px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.15);
+  border: 1px solid #f1f1f1;
   cursor: pointer;
 
   &:hover {
