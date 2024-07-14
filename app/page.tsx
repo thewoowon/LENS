@@ -334,13 +334,29 @@ export default function Home() {
             }}>
               SQL로 데이터 분석의 신이 되어 프로 일잘러로 거듭나는 방법이 여기
               있었네요. <br />
-              여러분! 이제 더 이상 두려워하지 마세요. 복잡한 데이터도 LENS와
+              여러분! 이제 더 이상 두려워하지 마세요. 복잡한 데이터도 <span
+                style={{
+                  fontFamily: "Goldman, sans-serif",
+                  fontWeight: 400,
+                  fontStyle: "normal",
+                }}
+              >
+                LENS
+              </span>와
               함께면 말랑말랑해집니다! <br />
               데이터베이스와 친해지는 첫걸음부터, 쿼리의 신이 되는 비법까지
               아낌없이 주는 LENS.
               <br /> 이젠 여러분도 데이터 앞에서 당당히 &quot;나, 프로
               일잘러야&quot; 외칠 준비 되셨나요? <br />
-              지금 바로 LENS를 시작해 보세요!
+              지금 바로 <span
+                style={{
+                  fontFamily: "Goldman, sans-serif",
+                  fontWeight: 400,
+                  fontStyle: "normal",
+                }}
+              >
+                LENS
+              </span>를 시작해 보세요!
             </Typography>
           </motion.div>
         </ScrollAnimation>
@@ -444,7 +460,15 @@ export default function Home() {
                 },
               }}
             >
-              LENS를 사용해야 하는 이유
+              <span
+                style={{
+                  fontFamily: "Goldman, sans-serif",
+                  fontWeight: 400,
+                  fontStyle: "normal",
+                }}
+              >
+                LENS
+              </span>를 사용해야 하는 이유
             </Typography>
             <Grid sx={{
               display: "grid",
