@@ -7,6 +7,7 @@ import customAxios from "@/lib/axios";
 import { highlightSQL } from "@/utils/highlightSQL";
 import { isValidJson } from "@/utils/isValidJson";
 import styled from "@emotion/styled";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -17,7 +18,8 @@ type FormType = {
 
 export type Mode = "chat" | "sql" | "schema";
 
-const ChatPage = () => {
+const ChatPage = ({ params }: { params: { sessionId: string | undefined } }) => {
+  const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [chatContext, setChatContext] = useState<
     {
@@ -29,7 +31,7 @@ const ChatPage = () => {
   const [selectedTab, setSelectedTab] = useState<"table" | "SQL" | "history">(
     "history"
   );
-  const [chatHistory, setChatHistory] = useState<MessageType[]>([]);
+  const [chatHistory, setChatHistory] = useState<MessageWithSessionType[]>([]);
   const [tableArray, setTableArray] = useState<TableType[]>([]);
   const [SQLArray, setSQLArray] = useState<MessageType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -92,7 +94,7 @@ const ChatPage = () => {
           {
             chat: "쿼리 결과입니다.",
             role: "lens",
-            data: result.data,
+            data: result,
           },
         ]);
       } catch (error) {
@@ -108,9 +110,16 @@ const ChatPage = () => {
           body: JSON.stringify({
             prompt: data.chat,
             accessToken: localStorage.getItem("accessToken"),
-            sessionId: null
+            // 첫번째 대화는 세션이 없습니다.
+            sessionId: params.sessionId,
           }),
         });
+
+        if (response.status === 307 && !params.sessionId) {
+          const { redirect_path } = await response.json();
+          router.replace(redirect_path);
+          return;
+        }
 
         const reader = response.body?.getReader();
         const decoder = new TextDecoder();
@@ -170,7 +179,7 @@ const ChatPage = () => {
 
   useEffect(() => {
     // params.sessionId를 통해서 -> 챗 히스토리
-    const getChatHistory = async () => {
+    const getHistory = async () => {
       try {
         const response = await customAxios(`/v1/history/get_history`, {
           method: "GET",
@@ -183,7 +192,7 @@ const ChatPage = () => {
       }
     }
 
-    getChatHistory();
+    getHistory();
   }, [])
 
   useEffect(() => {
@@ -270,7 +279,11 @@ const ChatPage = () => {
         {selectedTab === "SQL" && (
           <LeftScrollWrapper>
             {SQLArray.map((sql, index) => {
-              return <SQLBlock key={index} sql={sql} />;
+              return <SQLBlock key={index} sql={sql} onClick={() => {
+                setMode("sql");
+                setValue("chat", sql.message_text);
+
+              }} />;
             })}
           </LeftScrollWrapper>
         )}

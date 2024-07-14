@@ -1,5 +1,7 @@
 import styled from "@emotion/styled";
-import { forwardRef } from "react";
+import { forwardRef, useEffect, useState } from "react";
+import { marked } from 'marked';
+import parse from "html-react-parser";
 
 type LensChatProps = {
   chat: string;
@@ -8,6 +10,16 @@ type LensChatProps = {
 
 const LensChat = forwardRef<HTMLDivElement, LensChatProps>(
   ({ chat, data }, ref) => {
+    const [markdownContent, setMarkdownContent] = useState<string>("");
+
+    useEffect(() => {
+      const markdown = async () => {
+        setMarkdownContent(await marked(chat));
+      }
+
+      markdown();
+    }, [chat]);
+
     return (
       <Container ref={ref}>
         <div
@@ -52,96 +64,99 @@ const LensChat = forwardRef<HTMLDivElement, LensChatProps>(
             paddingLeft: "32px",
           }}
         >
-          {chat}
+          {parse(markdownContent)}
         </div>
-        <table
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "10px",
-            padding: "0 10px",
-            width: "100%",
-            maxWidth: "1000px",
-            overflowX: "auto",
-            backgroundColor: "white",
-            border: "1px solid #E5E5E5",
-            color: "black",
-          }}
-        >
-          {data &&
-            Array.isArray(data) &&
-            data.length > 0 &&
-            data.slice(0, 1).map((row, idx1) => (
-              <thead
-                key={idx1}
-                style={{
-                  display: "flex",
-                  gap: "10px",
-                  height: "50px",
-                  borderBottom: "1px solid #E5E5E5",
-                  overflowX: "auto",
-                  overflowY: "hidden",
-                }}
-              >
-                {Object.keys(row).map((key: string, idx2: number) => (
-                  <td
-                    key={idx2}
-                    style={{
-                      flex: "1",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "flex-start",
-                      width: "100px",
-                      overflowX: "auto",
-                      overflowY: "hidden",
-                      whiteSpace: "nowrap",
-                      textOverflow: "ellipsis",
-                      padding: "10px",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    <div>{key}</div>
-                  </td>
-                ))}
-              </thead>
-            ))}
-          {data &&
-            Array.isArray(data) &&
-            data.length > 0 &&
-            data.map((row, idx1) => (
-              <tr
-                key={idx1}
-                style={{
-                  display: "flex",
-                  gap: "10px",
-                  height: "50px",
-                  borderBottom: "1px solid #E5E5E5",
-                  overflowX: "auto",
-                  overflowY: "hidden",
-                }}
-              >
-                {Object.keys(row).map((key: string, idx2: number) => (
-                  <td
-                    key={idx2}
-                    style={{
-                      flex: "1",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "flex-start",
-                      width: "100px",
-                      overflowX: "auto",
-                      overflowY: "hidden",
-                      whiteSpace: "nowrap",
-                      textOverflow: "ellipsis",
-                      padding: "10px",
-                    }}
-                  >
-                    <div>{row[key]}</div>
-                  </td>
-                ))}
-              </tr>
-            ))}
-        </table>
+        {
+          data &&
+          Array.isArray(data) &&
+          data.length > 0 &&
+          <table
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px",
+              padding: "0 10px",
+              width: "100%",
+              maxWidth: "1000px",
+              overflowX: "auto",
+              backgroundColor: "white",
+              border: "1px solid #E5E5E5",
+              color: "black",
+            }}
+          >
+            {
+              data.slice(0, 1).map((row, idx1) => (
+                <thead
+                  key={idx1}
+                  style={{
+                    display: "flex",
+                    gap: "10px",
+                    height: "50px",
+                    borderBottom: "1px solid #E5E5E5",
+                    overflowX: "auto",
+                    overflowY: "hidden",
+                  }}
+                >
+                  {Object.keys(row).map((key: string, idx2: number) => (
+                    <td
+                      key={idx2}
+                      style={{
+                        flex: "1",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-start",
+                        width: "100px",
+                        overflowX: "auto",
+                        overflowY: "hidden",
+                        whiteSpace: "nowrap",
+                        textOverflow: "ellipsis",
+                        padding: "10px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      <div>{key}</div>
+                    </td>
+                  ))}
+                </thead>
+              ))}
+            {data &&
+              Array.isArray(data) &&
+              data.length > 0 &&
+              data.map((row, idx1) => (
+                <tr
+                  key={idx1}
+                  style={{
+                    display: "flex",
+                    gap: "10px",
+                    height: "50px",
+                    borderBottom: "1px solid #E5E5E5",
+                    overflowX: "auto",
+                    overflowY: "hidden",
+                  }}
+                >
+                  {Object.keys(row).map((key: string, idx2: number) => (
+                    <td
+                      key={idx2}
+                      style={{
+                        flex: "1",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-start",
+                        width: "100px",
+                        overflowX: "auto",
+                        overflowY: "hidden",
+                        whiteSpace: "nowrap",
+                        textOverflow: "ellipsis",
+                        padding: "10px",
+                      }}
+                    >
+                      <div>{row[key]}</div>
+                    </td>
+                  ))}
+                </tr>
+              ))}
+          </table>
+        }
       </Container>
     );
   }

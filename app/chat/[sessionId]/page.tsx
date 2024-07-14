@@ -7,6 +7,7 @@ import customAxios from "@/lib/axios";
 import { highlightSQL } from "@/utils/highlightSQL";
 import { isValidJson } from "@/utils/isValidJson";
 import styled from "@emotion/styled";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -18,6 +19,7 @@ type FormType = {
 export type Mode = "chat" | "sql" | "schema";
 
 const ChatWithSessionIdPage = ({ params }: { params: { sessionId: string } }) => {
+    const router = useRouter();
     const scrollRef = useRef<HTMLDivElement>(null);
     const [chatContext, setChatContext] = useState<
         {
@@ -29,12 +31,14 @@ const ChatWithSessionIdPage = ({ params }: { params: { sessionId: string } }) =>
     const [selectedTab, setSelectedTab] = useState<"table" | "SQL" | "history">(
         "history"
     );
-    const [chatHistory, setChatHistory] = useState<MessageType[]>([]);
+    const [chatHistory, setChatHistory] = useState<MessageWithSessionType[]>([]);
     const [tableArray, setTableArray] = useState<TableType[]>([]);
     const [SQLArray, setSQLArray] = useState<MessageType[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    const [mode, setMode] = useState<Mode>("sql");
+    const [mode, setMode] = useState<Mode>("chat");
+
+    const websocket = useRef(null);
 
     const { getValues, watch, setValue, handleSubmit, control } =
         useForm<FormType>({
@@ -105,6 +109,9 @@ const ChatWithSessionIdPage = ({ params }: { params: { sessionId: string } }) =>
                     },
                     body: JSON.stringify({
                         prompt: data.chat,
+                        accessToken: localStorage.getItem("accessToken"),
+                        // 첫번째 대화는 세션이 없습니다.
+                        sessionId: params.sessionId,
                     }),
                 });
 
@@ -169,7 +176,7 @@ const ChatWithSessionIdPage = ({ params }: { params: { sessionId: string } }) =>
         // params.sessionId를 통해서 -> 챗 히스토리
         const getChatHistory = async () => {
             try {
-                const response = await customAxios(`/v1/history/get_history`, {
+                const response = await customAxios(`/v1/history/get_chat_history`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -181,7 +188,40 @@ const ChatWithSessionIdPage = ({ params }: { params: { sessionId: string } }) =>
                 });
 
                 const { data } = response;
-                setChatContext(data);
+
+                // data의 마지막이 user인 경우 다시 서버에 요청을 보냄.
+                if (data.length > 0 && data[data.length - 1].sender_type === "user") {
+                    const response = await customAxios(`/v1/history/get_chat_history`, {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+                        },
+                        params: {
+                            session_id: params.sessionId,
+                        },
+                    });
+
+                    const { data } = response;
+                    setChatContext(data.map((chat: MessageType) => {
+                        return {
+                            chat: chat.message_text,
+                            role: chat.sender_type,
+                            data: [],
+                        };
+                    }
+                    ));
+                    return;
+                }
+
+                setChatContext(data.map((chat: MessageType) => {
+                    return {
+                        chat: chat.message_text,
+                        role: chat.sender_type,
+                        data: [],
+                    };
+                }
+                ));
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
@@ -192,7 +232,7 @@ const ChatWithSessionIdPage = ({ params }: { params: { sessionId: string } }) =>
 
     useEffect(() => {
         // params.sessionId를 통해서 -> 챗 히스토리
-        const getChatHistory = async () => {
+        const getHistory = async () => {
             try {
                 const response = await customAxios(`/v1/history/get_history`, {
                     method: "GET",
@@ -205,7 +245,7 @@ const ChatWithSessionIdPage = ({ params }: { params: { sessionId: string } }) =>
             }
         }
 
-        getChatHistory();
+        getHistory();
     }, [])
 
     useEffect(() => {
@@ -244,6 +284,48 @@ const ChatWithSessionIdPage = ({ params }: { params: { sessionId: string } }) =>
         getSQLArray();
     }, [])
 
+    // useEffect(() => {
+    //     if (params.sessionId) {
+    //         const websocket = new WebSocket(`ws://localhost:8000/ws/${params.sessionId}`);
+
+    //         websocket.onmessage = (event) => {
+    //             const message = event.data;
+    //             console.log('WebSocket message:', message);
+    //             // if (isValidJson(message)) {
+    //             //     const data = JSON.parse(message);
+    //             //     setChatContext([
+    //             //         ...chatContext,
+    //             //         {
+    //             //             chat: data.message_text,
+    //             //             role: data.sender_type,
+    //             //             data: data.data,
+    //             //         },
+    //             //     ]);
+    //             // } else {
+    //             //     setChatContext([
+    //             //         ...chatContext,
+    //             //         {
+    //             //             chat: message,
+    //             //             role: "lens",
+    //             //         },
+    //             //     ]);
+    //             // }
+    //         };
+
+    //         websocket.onclose = () => {
+    //             console.log('WebSocket disconnected');
+    //         };
+
+    //         websocket.onerror = (error) => {
+    //             console.error('WebSocket error:', error);
+    //         };
+
+    //         return () => {
+    //             websocket.close();
+    //         };
+    //     }
+    // }, [params.sessionId]);
+
     return (
         <Container>
             <LeftSide>
@@ -275,6 +357,9 @@ const ChatWithSessionIdPage = ({ params }: { params: { sessionId: string } }) =>
                 </Tabs>
                 {selectedTab === "history" && (
                     <LeftScrollWrapper>
+                        <NewLensStartButton onClick={() => {
+                            router.push("/chat");
+                        }}>새로운 LENS 시작하기</NewLensStartButton>
                         {chatHistory.map((history, index) => {
                             return <HistoryBlock key={index} history={history} />;
                         })}
@@ -290,7 +375,10 @@ const ChatWithSessionIdPage = ({ params }: { params: { sessionId: string } }) =>
                 {selectedTab === "SQL" && (
                     <LeftScrollWrapper>
                         {SQLArray.map((sql, index) => {
-                            return <SQLBlock key={index} sql={sql} />;
+                            return <SQLBlock key={index} sql={sql} onClick={() => {
+                                setMode("sql");
+                                setValue("chat", sql.message_text);
+                            }} />;
                         })}
                     </LeftScrollWrapper>
                 )}
@@ -338,12 +426,15 @@ const Container = styled.main`
 `;
 
 const LeftSide = styled.div`
-  min-width: 350px;
+  min-width: 300px;
+  max-width: 350px;
   height: 100%;
   border-right: 1px solid #e5e5e5;
   background: linear-gradient(180deg, #f9f9f9 0%, #f0f0f0 100%);
   padding: 20px 30px;
   transition: all 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
 
   @media (max-width: 1000px) {
     display: none;
@@ -438,5 +529,22 @@ const LeftScrollWrapper = styled.div`
   -ms-overflow-style: none;
   &::-webkit-scrollbar {
     display: none;
+  }
+`;
+
+const NewLensStartButton = styled.div`
+  width: 100%;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 6px;
+  text-align: center;
+  background-color: #e0e0e0;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+
+  &:hover {
+    background-color: #c4c4c4;
   }
 `;
