@@ -7,7 +7,7 @@ export async function POST(req: Request) {
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    `${process.env.NEXT_PUBLIC_API_URL}/api/auth/callback`
+    `${process.env.NEXT_PUBLIC_ORIGIN_URL}/api/auth/callback`
   );
 
   const { tokens } = await oauth2Client.getToken(code);
@@ -49,7 +49,7 @@ export async function GET(req: Request) {
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    `${process.env.NEXT_PUBLIC_API_URL}/api/auth/callback`
+    `${process.env.NEXT_PUBLIC_ORIGIN_URL}/api/auth/callback`
   );
 
   const url = oauth2Client.generateAuthUrl({

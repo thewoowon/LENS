@@ -34,7 +34,7 @@ const ChatPage = () => {
   const [SQLArray, setSQLArray] = useState<MessageType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const [mode, setMode] = useState<Mode>("sql");
+  const [mode, setMode] = useState<Mode>("chat");
 
   const { getValues, watch, setValue, handleSubmit, control } =
     useForm<FormType>({
@@ -56,6 +56,8 @@ const ChatPage = () => {
 
     if (mode === "sql") {
       try {
+        // 단순 실행으로 히스토리는 저장하지 않음 -> 하지만
+        // 실행이 되었을 때는 히스토리에 저장
         const result = await customAxios("/v1/query/execute_query", {
           method: "POST",
           data: {
@@ -105,6 +107,8 @@ const ChatPage = () => {
           },
           body: JSON.stringify({
             prompt: data.chat,
+            accessToken: localStorage.getItem("accessToken"),
+            sessionId: null
           }),
         });
 

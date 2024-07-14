@@ -13,16 +13,17 @@ async function fetchWithTimeout(url: string, options: any, timeout = 10000) {
 }
 
 export async function POST(req: NextRequest) {
-  const { prompt } = await req.json();
+  const { prompt, sessionId, accessToken } = await req.json();
   try {
     const response = await fetchWithTimeout(
-      "https://api.lensql.chat/v1/llm/execute_llm",
+      process.env.NEXT_PUBLIC_API_URL + "/v1/llm/execute_llm",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt, session_id: sessionId }),
       }
     );
 

@@ -31,7 +31,7 @@ customAxios.interceptors.response.use(
   async (error) => {
     console.error("Error fetching data:", error);
     const originalRequest = error.config;
-    const refreshToken = localStorage.getItem("refresh_token");
+    const refreshToken = localStorage.getItem("refreshToken");
 
     if (
       error.response.status === 401 &&
@@ -41,9 +41,9 @@ customAxios.interceptors.response.use(
       originalRequest._retry = true;
       try {
         const response = await axios.post(
-          "https://api.lensql.chat/user/token/refresh",
+          process.env.NEXT_PUBLIC_API_URL + "/v1/user/token/refresh",
           {
-            token: refreshToken,
+            refresh_token: refreshToken,
           }
         );
 
@@ -62,10 +62,10 @@ customAxios.interceptors.response.use(
         return Promise.reject(refreshError);
       }
     } else {
-      // 401이면 다시 로그인
-
+      // Handle other errors, e.g., redirect to error page
+      console.error("Error fetching data:", error);
+      return Promise.reject(error);
     }
-    return Promise.reject(error);
   }
 );
 
