@@ -8,6 +8,10 @@ type MessageType = {
     user_id: number;
 }
 
+type MessageWithSessionType = MessageType & {
+    session_code: string;
+}
+
 type TableType = {
     columns: ColumnType[];
     foreign_keys: string[];
