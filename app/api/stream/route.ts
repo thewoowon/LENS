@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-async function fetchWithTimeout(url: string, options: any, timeout = 10000) {
+async function fetchWithTimeout(url: string, options: any, timeout = 100000) {
   // 타임아웃 시간을 10초로 설정
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);

@@ -13,407 +13,474 @@ import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
 type FormType = {
-    chat: string;
+  chat: string;
 };
 
 export type Mode = "chat" | "sql" | "schema";
 
-const ChatWithSessionIdPage = ({ params }: { params: { sessionId: string } }) => {
-    const router = useRouter();
-    const scrollRef = useRef<HTMLDivElement>(null);
-    const [chatContext, setChatContext] = useState<
-        {
-            chat: string;
-            role: "user" | "lens";
-            data?: any[];
-        }[]
-    >([]);
-    const [selectedTab, setSelectedTab] = useState<"table" | "SQL" | "history">(
-        "history"
-    );
-    const [chatHistory, setChatHistory] = useState<MessageWithSessionType[]>([]);
-    const [tableArray, setTableArray] = useState<TableType[]>([]);
-    const [SQLArray, setSQLArray] = useState<MessageType[]>([]);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
+const ChatWithSessionIdPage = ({
+  params,
+}: {
+  params: { sessionId: string };
+}) => {
+  const router = useRouter();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [chatContext, setChatContext] = useState<
+    {
+      chat: string;
+      role: "user" | "lens";
+      data?: any[];
+      sql?: string;
+      loading?: boolean;
+    }[]
+  >([]);
+  const [selectedTab, setSelectedTab] = useState<"table" | "SQL" | "history">(
+    "history"
+  );
+  const [chatHistory, setChatHistory] = useState<MessageWithSessionType[]>([]);
+  const [tableArray, setTableArray] = useState<TableType[]>([]);
+  const [SQLArray, setSQLArray] = useState<MessageType[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    const [mode, setMode] = useState<Mode>("chat");
+  const [mode, setMode] = useState<Mode>("chat");
 
-    const websocket = useRef(null);
+  const websocket = useRef(null);
 
-    const { getValues, watch, setValue, handleSubmit, control } =
-        useForm<FormType>({
-            defaultValues: {
-                chat: "",
-            },
-        });
+  const { getValues, watch, setValue, handleSubmit, control } =
+    useForm<FormType>({
+      defaultValues: {
+        chat: "",
+      },
+    });
 
-    const onSubmit = async (data: { chat: string }) => {
-        setValue("chat", "");
-        setIsLoading(true);
-        setChatContext([
+  const onSubmit = async (data: { chat: string }) => {
+    setValue("chat", "");
+    setIsLoading(true);
+    setChatContext([
+      ...chatContext,
+      {
+        chat: mode === "sql" ? highlightSQL(data.chat) : data.chat,
+        role: "user",
+      },
+    ]);
+
+    if (mode === "sql") {
+      try {
+        const result = await customAxios("/v1/query/execute_query", {
+          method: "POST",
+          data: {
+            text: data.chat,
+          },
+        })
+          .then((res) => {
+            return res.data;
+          })
+          .catch((error) => {
+            return error.response;
+          });
+
+        if (result.status === 400) {
+          setChatContext([
             ...chatContext,
             {
-                chat: mode === "sql" ? highlightSQL(data.chat) : data.chat,
-                role: "user",
+              chat: "쿼리 실행 중 오류가 발생했습니다.",
+              role: "lens",
             },
+          ]);
+          setIsLoading(false);
+          return;
+        }
+
+        setChatContext([
+          ...chatContext,
+          {
+            chat: mode === "sql" ? highlightSQL(data.chat) : data.chat,
+            role: "user",
+          },
+          {
+            chat: "쿼리 결과입니다.",
+            role: "lens",
+            data: result.data,
+          },
+        ]);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    } else if (mode === "chat") {
+      try {
+        setChatContext([
+          ...chatContext,
+          {
+            chat: data.chat,
+            role: "user",
+          },
+          {
+            chat: "",
+            role: "lens",
+            loading: true,
+          },
         ]);
 
-        if (mode === "sql") {
-            try {
-                const result = await customAxios("/v1/query/execute_query", {
-                    method: "POST",
-                    data: {
-                        text: data.chat,
-                    },
-                })
-                    .then((res) => {
-                        return res.data;
-                    })
-                    .catch((error) => {
-                        return error.response;
-                    });
+        const response = await fetch("/api/stream", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            prompt: data.chat,
+            accessToken: localStorage.getItem("accessToken"),
+            // 첫번째 대화는 세션이 없습니다.
+            sessionId: params.sessionId,
+          }),
+        });
 
-                if (result.status === 400) {
-                    setChatContext([
-                        ...chatContext,
-                        {
-                            chat: "쿼리 실행 중 오류가 발생했습니다.",
-                            role: "lens",
-                        },
-                    ]);
-                    setIsLoading(false);
-                    return;
-                }
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let result = "";
 
-                setChatContext([
-                    ...chatContext,
-                    {
-                        chat: mode === "sql" ? highlightSQL(data.chat) : data.chat,
-                        role: "user",
-                    },
-                    {
-                        chat: "쿼리 결과입니다.",
-                        role: "lens",
-                        data: result.data,
-                    },
-                ]);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        } else if (mode === "chat") {
-            try {
-                const response = await fetch("/api/stream", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        prompt: data.chat,
-                        accessToken: localStorage.getItem("accessToken"),
-                        // 첫번째 대화는 세션이 없습니다.
-                        sessionId: params.sessionId,
-                    }),
-                });
-
-                const reader = response.body?.getReader();
-                const decoder = new TextDecoder();
-                let result = "";
-
-                while (true) {
-                    const { done, value } = (await reader?.read()) ?? {};
-                    if (done) break;
-                    result += decoder.decode(value, { stream: true });
-                    setChatContext([
-                        ...chatContext,
-                        {
-                            chat: data.chat,
-                            role: "user",
-                        },
-                        {
-                            chat: result,
-                            role: "lens",
-                        },
-                    ]);
-                }
-            } catch (error) {
-                console.error("스트림 통신 중에 에러가 발생했어요.", error);
-                toast.error("스트림 통신 중에 에러가 발생했어요.");
-                setChatContext([
-                    ...chatContext,
-                    {
-                        chat: "쿼리 실행 중 오류가 발생했습니다.",
-                        role: "lens",
-                    },
-                ]);
-                setIsLoading(false);
-                return;
-            }
-        } else {
-            setChatContext([
-                ...chatContext,
-                {
-                    chat: data.chat,
-                    role: "user",
-                },
-                {
-                    chat: "스키마는 준비 중입니다.",
-                    role: "lens",
-                    data: [],
-                },
-            ]);
+        while (true) {
+          const { done, value } = (await reader?.read()) ?? {};
+          if (done) break;
+          result += decoder.decode(value, { stream: true });
+          setChatContext([
+            ...chatContext,
+            {
+              chat: data.chat,
+              role: "user",
+            },
+            {
+              chat: result,
+              role: "lens",
+            },
+          ]);
         }
 
+        // 직전 쿼리 가져오기
+        const sqlResponse = await customAxios("v1/llm/sql_history", {
+          method: "GET",
+          params: {
+            session_id: params.sessionId,
+          },
+        }).then((res) => {
+          return res.data;
+        });
+
+        for (const sql of sqlResponse) {
+          setChatContext([
+            ...chatContext,
+            {
+              chat: data.chat,
+              role: "user",
+            },
+            {
+              chat: result,
+              role: "lens",
+            },
+            {
+              sql: sql.query,
+              chat: "쿼리입니다.",
+              role: "lens",
+            },
+          ]);
+        }
+      } catch (error) {
+        console.error("스트림 통신 중에 에러가 발생했어요.", error);
+        toast.error("스트림 통신 중에 에러가 발생했어요.");
+        setChatContext([
+          ...chatContext,
+          {
+            chat: "쿼리 실행 중 오류가 발생했습니다.",
+            role: "lens",
+          },
+        ]);
         setIsLoading(false);
+        return;
+      }
+    } else {
+      setChatContext([
+        ...chatContext,
+        {
+          chat: data.chat,
+          role: "user",
+        },
+        {
+          chat: "스키마는 준비 중입니다.",
+          role: "lens",
+          data: [],
+        },
+      ]);
+    }
+
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    setTimeout(() => {
+      scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  }, [chatContext]);
+
+  useEffect(() => {
+    // params.sessionId를 통해서 -> 챗 히스토리
+    const getChatHistory = async () => {
+      try {
+        const response = await customAxios(`/v1/history/get_chat_history`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          params: {
+            session_id: params.sessionId,
+          },
+        });
+
+        const { data } = response;
+
+        // data의 마지막이 user인 경우 다시 서버에 요청을 보냄.
+        if (data.length > 0 && data[data.length - 1].sender_type === "user") {
+          const response = await customAxios(`/v1/history/get_chat_history`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+            params: {
+              session_id: params.sessionId,
+            },
+          });
+
+          const { data } = response;
+          setChatContext(
+            data.map((chat: MessageType) => {
+              return {
+                chat: chat.message_text,
+                role: chat.sender_type,
+                data: [],
+              };
+            })
+          );
+          return;
+        }
+
+        setChatContext(
+          data.map((chat: MessageType) => {
+            return {
+              chat: chat.message_text,
+              role: chat.sender_type,
+              data: [],
+            };
+          })
+        );
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
     };
 
-    useEffect(() => {
-        setTimeout(() => {
-            scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-        }, 100);
-    }, [chatContext]);
+    getChatHistory();
+  }, []);
 
-    useEffect(() => {
-        // params.sessionId를 통해서 -> 챗 히스토리
-        const getChatHistory = async () => {
-            try {
-                const response = await customAxios(`/v1/history/get_chat_history`, {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
-                    },
-                    params: {
-                        session_id: params.sessionId,
-                    },
-                });
+  useEffect(() => {
+    // params.sessionId를 통해서 -> 챗 히스토리
+    const getHistory = async () => {
+      try {
+        const response = await customAxios(`/v1/history/get_history`, {
+          method: "GET",
+        });
 
-                const { data } = response;
+        const { data } = response;
+        setChatHistory(data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
 
-                // data의 마지막이 user인 경우 다시 서버에 요청을 보냄.
-                if (data.length > 0 && data[data.length - 1].sender_type === "user") {
-                    const response = await customAxios(`/v1/history/get_chat_history`, {
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
-                        },
-                        params: {
-                            session_id: params.sessionId,
-                        },
-                    });
+    getHistory();
+  }, []);
 
-                    const { data } = response;
-                    setChatContext(data.map((chat: MessageType) => {
-                        return {
-                            chat: chat.message_text,
-                            role: chat.sender_type,
-                            data: [],
-                        };
-                    }
-                    ));
-                    return;
-                }
+  useEffect(() => {
+    // params.sessionId를 통해서 -> 테이블 정보
+    const getTableArray = async () => {
+      try {
+        const response = await customAxios(`/v1/table/get_table_list`, {
+          method: "GET",
+        });
 
-                setChatContext(data.map((chat: MessageType) => {
-                    return {
-                        chat: chat.message_text,
-                        role: chat.sender_type,
-                        data: [],
-                    };
-                }
-                ));
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        }
+        const { data } = response;
+        setTableArray(data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
 
-        getChatHistory();
-    }, [])
+    getTableArray();
+  }, []);
 
-    useEffect(() => {
-        // params.sessionId를 통해서 -> 챗 히스토리
-        const getHistory = async () => {
-            try {
-                const response = await customAxios(`/v1/history/get_history`, {
-                    method: "GET",
-                });
+  useEffect(() => {
+    // params.sessionId를 통해서 -> SQL 히스토리
+    const getSQLArray = async () => {
+      try {
+        const response = await customAxios(`/v1/history/get_sql_history`, {
+          method: "GET",
+        });
 
-                const { data } = response;
-                setChatHistory(data);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        }
+        const { data } = response;
+        setSQLArray(data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
 
-        getHistory();
-    }, [])
+    getSQLArray();
+  }, []);
 
-    useEffect(() => {
-        // params.sessionId를 통해서 -> 테이블 정보
-        const getTableArray = async () => {
-            try {
-                const response = await customAxios(`/v1/table/get_table_list`, {
-                    method: "GET",
-                });
+  // useEffect(() => {
+  //     if (params.sessionId) {
+  //         const websocket = new WebSocket(`ws://localhost:8000/ws/${params.sessionId}`);
 
-                const { data } = response;
-                setTableArray(data);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        }
+  //         websocket.onmessage = (event) => {
+  //             const message = event.data;
+  //             console.log('WebSocket message:', message);
+  //             // if (isValidJson(message)) {
+  //             //     const data = JSON.parse(message);
+  //             //     setChatContext([
+  //             //         ...chatContext,
+  //             //         {
+  //             //             chat: data.message_text,
+  //             //             role: data.sender_type,
+  //             //             data: data.data,
+  //             //         },
+  //             //     ]);
+  //             // } else {
+  //             //     setChatContext([
+  //             //         ...chatContext,
+  //             //         {
+  //             //             chat: message,
+  //             //             role: "lens",
+  //             //         },
+  //             //     ]);
+  //             // }
+  //         };
 
-        getTableArray();
-    }, [])
+  //         websocket.onclose = () => {
+  //             console.log('WebSocket disconnected');
+  //         };
 
-    useEffect(() => {
-        // params.sessionId를 통해서 -> SQL 히스토리
-        const getSQLArray = async () => {
-            try {
-                const response = await customAxios(`/v1/history/get_sql_history`, {
-                    method: "GET",
-                });
+  //         websocket.onerror = (error) => {
+  //             console.error('WebSocket error:', error);
+  //         };
 
-                const { data } = response;
-                setSQLArray(data);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        }
+  //         return () => {
+  //             websocket.close();
+  //         };
+  //     }
+  // }, [params.sessionId]);
 
-        getSQLArray();
-    }, [])
-
-    // useEffect(() => {
-    //     if (params.sessionId) {
-    //         const websocket = new WebSocket(`ws://localhost:8000/ws/${params.sessionId}`);
-
-    //         websocket.onmessage = (event) => {
-    //             const message = event.data;
-    //             console.log('WebSocket message:', message);
-    //             // if (isValidJson(message)) {
-    //             //     const data = JSON.parse(message);
-    //             //     setChatContext([
-    //             //         ...chatContext,
-    //             //         {
-    //             //             chat: data.message_text,
-    //             //             role: data.sender_type,
-    //             //             data: data.data,
-    //             //         },
-    //             //     ]);
-    //             // } else {
-    //             //     setChatContext([
-    //             //         ...chatContext,
-    //             //         {
-    //             //             chat: message,
-    //             //             role: "lens",
-    //             //         },
-    //             //     ]);
-    //             // }
-    //         };
-
-    //         websocket.onclose = () => {
-    //             console.log('WebSocket disconnected');
-    //         };
-
-    //         websocket.onerror = (error) => {
-    //             console.error('WebSocket error:', error);
-    //         };
-
-    //         return () => {
-    //             websocket.close();
-    //         };
-    //     }
-    // }, [params.sessionId]);
-
-    return (
-        <Container>
-            <LeftSide>
-                <Tabs>
-                    <Tab
-                        selected={selectedTab === "history"}
-                        onClick={() => {
-                            setSelectedTab("history");
-                        }}
-                    >
-                        히스토리
-                    </Tab>
-                    <Tab
-                        selected={selectedTab === "table"}
-                        onClick={() => {
-                            setSelectedTab("table");
-                        }}
-                    >
-                        테이블
-                    </Tab>
-                    <Tab
-                        selected={selectedTab === "SQL"}
-                        onClick={() => {
-                            setSelectedTab("SQL");
-                        }}
-                    >
-                        SQL
-                    </Tab>
-                </Tabs>
-                {selectedTab === "history" && (
-                    <LeftScrollWrapper>
-                        <NewLensStartButton onClick={() => {
-                            router.push("/chat");
-                        }}>새로운 LENS 시작하기</NewLensStartButton>
-                        {chatHistory.map((history, index) => {
-                            return <HistoryBlock key={index} history={history} />;
-                        })}
-                    </LeftScrollWrapper>
-                )}
-                {selectedTab === "table" && (
-                    <LeftScrollWrapper>
-                        {tableArray.map((table, index) => {
-                            return <TableBlock key={index} table={table} />;
-                        })}
-                    </LeftScrollWrapper>
-                )}
-                {selectedTab === "SQL" && (
-                    <LeftScrollWrapper>
-                        {SQLArray.map((sql, index) => {
-                            return <SQLBlock key={index} sql={sql} onClick={() => {
-                                setMode("sql");
-                                setValue("chat", sql.message_text);
-                            }} />;
-                        })}
-                    </LeftScrollWrapper>
-                )}
-            </LeftSide>
-            <ChatArea>
-                <Title>
-                    {mode === "sql"
-                        ? "SQL 모드입니다."
-                        : chatContext.length === 0
-                            ? "채팅을 시작해보세요."
-                            : chatContext[0].role === "user" && chatContext[0].chat}
-                </Title>
-                <Wrapper>
-                    <ChatContext>
-                        {chatContext.map((context, index) => {
-                            const { chat, role, data } = context;
-                            if (role === "user") {
-                                return <UserChat key={index} chat={chat} ref={scrollRef} />;
-                            }
-                            return (
-                                <LensChat key={index} chat={chat} data={data} ref={scrollRef} />
-                            );
-                        })}
-                    </ChatContext>
-                    <ChatBox
-                        onSubmit={handleSubmit(onSubmit)}
-                        control={control}
-                        isLoading={isLoading}
-                        mode={mode}
-                        setMode={setMode}
-                    />
-                </Wrapper>
-            </ChatArea>
-        </Container>
-    );
+  return (
+    <Container>
+      <LeftSide>
+        <Tabs>
+          <Tab
+            selected={selectedTab === "history"}
+            onClick={() => {
+              setSelectedTab("history");
+            }}
+          >
+            히스토리
+          </Tab>
+          <Tab
+            selected={selectedTab === "table"}
+            onClick={() => {
+              setSelectedTab("table");
+            }}
+          >
+            테이블
+          </Tab>
+          <Tab
+            selected={selectedTab === "SQL"}
+            onClick={() => {
+              setSelectedTab("SQL");
+            }}
+          >
+            SQL
+          </Tab>
+        </Tabs>
+        {selectedTab === "history" && (
+          <LeftScrollWrapper>
+            <NewLensStartButton
+              onClick={() => {
+                router.push("/chat");
+              }}
+            >
+              새로운 LENS 시작하기
+            </NewLensStartButton>
+            {chatHistory.map((history, index) => {
+              return <HistoryBlock key={index} history={history} />;
+            })}
+          </LeftScrollWrapper>
+        )}
+        {selectedTab === "table" && (
+          <LeftScrollWrapper>
+            {tableArray.map((table, index) => {
+              return <TableBlock key={index} table={table} />;
+            })}
+          </LeftScrollWrapper>
+        )}
+        {selectedTab === "SQL" && (
+          <LeftScrollWrapper>
+            {SQLArray.map((sql, index) => {
+              return (
+                <SQLBlock
+                  key={index}
+                  sql={sql}
+                  onClick={() => {
+                    setMode("sql");
+                    setValue("chat", sql.message_text);
+                  }}
+                />
+              );
+            })}
+          </LeftScrollWrapper>
+        )}
+      </LeftSide>
+      <ChatArea>
+        <Title>
+          {mode === "sql"
+            ? "SQL 모드입니다."
+            : chatContext.length === 0
+              ? "채팅을 시작해보세요."
+              : chatContext[0].role === "user" && chatContext[0].chat}
+        </Title>
+        <Wrapper>
+          <ChatContext>
+            {chatContext.map((context, index) => {
+              const { chat, role, data, sql, loading } = context;
+              if (role === "user") {
+                return <UserChat key={index} chat={chat} ref={scrollRef} />;
+              }
+              return (
+                <LensChat
+                  key={index}
+                  chat={chat}
+                  data={data}
+                  ref={scrollRef}
+                  sql={sql}
+                  loading={!!loading}
+                />
+              );
+            })}
+          </ChatContext>
+          <ChatBox
+            onSubmit={handleSubmit(onSubmit)}
+            control={control}
+            isLoading={isLoading}
+            mode={mode}
+            setMode={setMode}
+          />
+        </Wrapper>
+      </ChatArea>
+    </Container>
+  );
 };
 
 export default ChatWithSessionIdPage;
@@ -476,7 +543,7 @@ const Tabs = styled.div`
 `;
 
 const Tab = styled.div<{
-    selected?: boolean;
+  selected?: boolean;
 }>`
   width: 74px;
   padding: 10px 0;

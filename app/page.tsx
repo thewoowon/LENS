@@ -15,7 +15,7 @@ import { Typography, Grid, Box } from "@mui/material";
 import { motion, useAnimation } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 const comment: {
   name: string;
@@ -24,72 +24,82 @@ const comment: {
   alt: string;
   position: string;
 }[] = [
-    {
-      name: "김철수",
-      review: "LENS 덕분에 SQL 쿼리 작성이 정말 쉬워졌어요. 이제는 복잡한 데이터도 간편하게 처리할 수 있습니다!",
-      image: "/images/lens_figure_1.png",
-      alt: "김철수의 사진",
-      position: "데이터 분석가"
-    },
-    {
-      name: "박영희",
-      review: "생성형 AI 서비스 LENS는 마치 마법 같아요. 몇 번의 클릭만으로 원하는 데이터를 정확히 뽑아낼 수 있어요.",
-      image: "/images/lens_figure_2.png",
-      alt: "박영희의 사진",
-      position: "비즈니스 애널리스트"
-    },
-    {
-      name: "이민수",
-      review: "LENS를 사용한 후, SQL 쿼리 작성 시간이 절반으로 줄었어요. 업무 효율성이 크게 향상되었습니다.",
-      image: "/images/lens_figure_3.png",
-      alt: "이민수의 사진",
-      position: "소프트웨어 엔지니어"
-    },
-    {
-      name: "최지은",
-      review: "SQL 쿼리에 익숙하지 않은 사람도 LENS 덕분에 쉽게 배울 수 있어요. 정말 혁신적인 도구입니다!",
-      image: "/images/lens_figure_4.png",
-      alt: "최지은의 사진",
-      position: "프로젝트 매니저"
-    },
-    {
-      name: "홍길동",
-      review: "LENS를 사용한 후로 데이터베이스 관리가 훨씬 수월해졌어요. 이제는 복잡한 쿼리도 문제없습니다.",
-      image: "/images/lens_figure_5.png",
-      alt: "홍길동의 사진",
-      position: "데이터베이스 관리자"
-    },
-    {
-      name: "윤미래",
-      review: "LENS는 저의 최고의 비밀 무기예요. 덕분에 팀의 데이터 분석 역량이 크게 향상되었습니다.",
-      image: "/images/lens_figure_6.png",
-      alt: "윤미래의 사진",
-      position: "마케팅 전문가"
-    }
-  ];
-
+  {
+    name: "김철수",
+    review:
+      "LENS 덕분에 SQL 쿼리 작성이 정말 쉬워졌어요. 이제는 복잡한 데이터도 간편하게 처리할 수 있습니다!",
+    image: "/images/lens_figure_1.png",
+    alt: "김철수의 사진",
+    position: "데이터 분석가",
+  },
+  {
+    name: "박영희",
+    review:
+      "생성형 AI 서비스 LENS는 마치 마법 같아요. 몇 번의 클릭만으로 원하는 데이터를 정확히 뽑아낼 수 있어요.",
+    image: "/images/lens_figure_2.png",
+    alt: "박영희의 사진",
+    position: "비즈니스 애널리스트",
+  },
+  {
+    name: "이민수",
+    review:
+      "LENS를 사용한 후, SQL 쿼리 작성 시간이 절반으로 줄었어요. 업무 효율성이 크게 향상되었습니다.",
+    image: "/images/lens_figure_3.png",
+    alt: "이민수의 사진",
+    position: "소프트웨어 엔지니어",
+  },
+  {
+    name: "최지은",
+    review:
+      "SQL 쿼리에 익숙하지 않은 사람도 LENS 덕분에 쉽게 배울 수 있어요. 정말 혁신적인 도구입니다!",
+    image: "/images/lens_figure_4.png",
+    alt: "최지은의 사진",
+    position: "프로젝트 매니저",
+  },
+  {
+    name: "홍길동",
+    review:
+      "LENS를 사용한 후로 데이터베이스 관리가 훨씬 수월해졌어요. 이제는 복잡한 쿼리도 문제없습니다.",
+    image: "/images/lens_figure_5.png",
+    alt: "홍길동의 사진",
+    position: "데이터베이스 관리자",
+  },
+  {
+    name: "윤미래",
+    review:
+      "LENS는 저의 최고의 비밀 무기예요. 덕분에 팀의 데이터 분석 역량이 크게 향상되었습니다.",
+    image: "/images/lens_figure_6.png",
+    alt: "윤미래의 사진",
+    position: "마케팅 전문가",
+  },
+];
 
 const reasons: {
   reason: string;
   description: string;
   image: string;
 }[] = [
-    {
-      reason: "업무 효율성 극대화",
-      description: "LENS는 SQL 쿼리 작성 시간을 크게 줄여줍니다.",
-      image: "https://imagedelivery.net/6qzLODAqs2g1LZbVYqtuQw/5617a243-fb35-4add-ef60-2771aa576d00/public",
-    },
-    {
-      reason: "초보자도 쉽게 사용 가능",
-      description: "SQL 쿼리에 익숙하지 않은 사용자도 LENS를 통해 쉽게 데이터베이스 작업을 수행할 수 있습니다.",
-      image: "https://imagedelivery.net/6qzLODAqs2g1LZbVYqtuQw/228f71b9-ce38-4294-b6ce-42ffbde6ce00/public",
-    },
-    {
-      reason: "정확하고 신뢰성 있는 쿼리 생성",
-      description: "LENS는 고도의 정확성을 자랑하는 AI 알고리즘을 기반으로, 오류 없이 신뢰할 수 있는 SQL 쿼리를 생성해줍니다.",
-      image: "https://imagedelivery.net/6qzLODAqs2g1LZbVYqtuQw/e2297c5c-b972-469f-3748-893b5f2cf900/public",
-    },
-  ]
+  {
+    reason: "업무 효율성 극대화",
+    description: "LENS는 SQL 쿼리 작성 시간을 크게 줄여줍니다.",
+    image:
+      "https://imagedelivery.net/6qzLODAqs2g1LZbVYqtuQw/5617a243-fb35-4add-ef60-2771aa576d00/public",
+  },
+  {
+    reason: "초보자도 쉽게 사용 가능",
+    description:
+      "SQL 쿼리에 익숙하지 않은 사용자도 LENS를 통해 쉽게 데이터베이스 작업을 수행할 수 있습니다.",
+    image:
+      "https://imagedelivery.net/6qzLODAqs2g1LZbVYqtuQw/228f71b9-ce38-4294-b6ce-42ffbde6ce00/public",
+  },
+  {
+    reason: "정확하고 신뢰성 있는 쿼리 생성",
+    description:
+      "LENS는 고도의 정확성을 자랑하는 AI 알고리즘을 기반으로, 오류 없이 신뢰할 수 있는 SQL 쿼리를 생성해줍니다.",
+    image:
+      "https://imagedelivery.net/6qzLODAqs2g1LZbVYqtuQw/e2297c5c-b972-469f-3748-893b5f2cf900/public",
+  },
+];
 
 export default function Home() {
   const router = useRouter();
@@ -233,30 +243,31 @@ export default function Home() {
       </Section>
       <Section>
         <ScrollAnimation>
-          <Grid sx={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gridTemplateRows: "repeat(2, 1fr)",
-            gap: "20px",
-            width: "100%",
-            maxWidth: "1200px",
-            margin: "0 auto",
-            padding: "20px",
+          <Grid
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4, 1fr)",
+              gridTemplateRows: "repeat(2, 1fr)",
+              gap: "20px",
+              width: "100%",
+              maxWidth: "1200px",
+              margin: "0 auto",
+              padding: "20px",
 
-            "@media (max-width: 1440px)": {
-              gridTemplateColumns: "repeat(3, 1fr)",
-            },
+              "@media (max-width: 1440px)": {
+                gridTemplateColumns: "repeat(3, 1fr)",
+              },
 
-            "@media (max-width: 1024px)": {
-              gridTemplateColumns: "repeat(2, 1fr)",
-              gap: "60px",
-            },
+              "@media (max-width: 1024px)": {
+                gridTemplateColumns: "repeat(2, 1fr)",
+                gap: "60px",
+              },
 
-            "@media (max-width: 768px)": {
-              gridTemplateColumns: "repeat(1, 1fr)",
-              gap: "80px",
-            },
-          }}
+              "@media (max-width: 768px)": {
+                gridTemplateColumns: "repeat(1, 1fr)",
+                gap: "80px",
+              },
+            }}
           >
             {[
               AliExpress,
@@ -287,12 +298,14 @@ export default function Home() {
       </Section>
       <Section>
         <ScrollAnimation>
-          <motion.div style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-          }}>
+          <motion.div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
             <Typography
               sx={{
                 fontSize: "44px",
@@ -320,21 +333,26 @@ export default function Home() {
               </span>
               가 되는 길
             </Typography>
-            <Typography variant="body1" textAlign={"center"} lineHeight={"28px"} sx={{
-              fontSize: "20px",
-              fontWeight: "light",
-              marginBottom: "40px",
-              "@media (max-width: 1440px)": {
-                fontSize: "16px",
-              },
-              "@media (max-width: 768px)": {
-                fontSize: "14px",
-              },
-
-            }}>
+            <Typography
+              variant="body1"
+              textAlign={"center"}
+              lineHeight={"28px"}
+              sx={{
+                fontSize: "20px",
+                fontWeight: "light",
+                marginBottom: "40px",
+                "@media (max-width: 1440px)": {
+                  fontSize: "16px",
+                },
+                "@media (max-width: 768px)": {
+                  fontSize: "14px",
+                },
+              }}
+            >
               SQL로 데이터 분석의 신이 되어 프로 일잘러로 거듭나는 방법이 여기
               있었네요. <br />
-              여러분! 이제 더 이상 두려워하지 마세요. 복잡한 데이터도 <span
+              여러분! 이제 더 이상 두려워하지 마세요. 복잡한 데이터도{" "}
+              <span
                 style={{
                   fontFamily: "Goldman, sans-serif",
                   fontWeight: 400,
@@ -342,13 +360,14 @@ export default function Home() {
                 }}
               >
                 LENS
-              </span>와
-              함께면 말랑말랑해집니다! <br />
+              </span>
+              와 함께면 말랑말랑해집니다! <br />
               데이터베이스와 친해지는 첫걸음부터, 쿼리의 신이 되는 비법까지
               아낌없이 주는 LENS.
               <br /> 이젠 여러분도 데이터 앞에서 당당히 &quot;나, 프로
               일잘러야&quot; 외칠 준비 되셨나요? <br />
-              지금 바로 <span
+              지금 바로{" "}
+              <span
                 style={{
                   fontFamily: "Goldman, sans-serif",
                   fontWeight: 400,
@@ -356,95 +375,111 @@ export default function Home() {
                 }}
               >
                 LENS
-              </span>를 시작해 보세요!
+              </span>
+              를 시작해 보세요!
             </Typography>
           </motion.div>
         </ScrollAnimation>
-        <Grid sx={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: "24px",
-          marginTop: "40px",
+        <Grid
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: "24px",
+            marginTop: "40px",
 
-          "@media (max-width: 1440px)": {
-            gridTemplateColumns: "repeat(2, 1fr)",
-          },
+            "@media (max-width: 1440px)": {
+              gridTemplateColumns: "repeat(2, 1fr)",
+            },
 
-          "@media (max-width: 700px)": {
-            gridTemplateColumns: "repeat(1, 1fr)",
-          },
-        }}>
-          {
-            comment.map((item, index) => {
-              return (
+            "@media (max-width: 700px)": {
+              gridTemplateColumns: "repeat(1, 1fr)",
+            },
+          }}
+        >
+          {comment.map((item, index) => {
+            return (
+              <Box
+                key={index}
+                display={"flex"}
+                alignItems={"flex-start"}
+                justifyContent={"center"}
+                flexDirection={"column"}
+                maxWidth={"400px"}
+                minWidth={"300px"}
+                width={"100%"}
+                sx={{
+                  backgroundColor: "rgba(255, 255, 255, 0.08)",
+                  padding: "36px",
+                  gap: "20px",
+                  borderRadius: "20px",
+                }}
+              >
                 <Box
-                  key={index}
-                  display={"flex"}
-                  alignItems={"flex-start"}
-                  justifyContent={"center"}
-                  flexDirection={"column"}
-                  maxWidth={"400px"}
-                  minWidth={"300px"}
-                  width={"100%"}
                   sx={{
-                    backgroundColor: "rgba(255, 255, 255, 0.08)",
-                    padding: "36px",
-                    gap: "20px",
-                    borderRadius: "20px",
-                  }}
-                >
-                  <Box sx={{
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
                     gap: "20px",
-                  }}>
-                    <Box display={"flex"} alignItems={"center"} justifyContent={"center"} sx={{
+                  }}
+                >
+                  <Box
+                    display={"flex"}
+                    alignItems={"center"}
+                    justifyContent={"center"}
+                    sx={{
                       backgroundColor: "rgba(255, 255, 255, 0.08)",
                       borderRadius: "50%",
                       overflow: "hidden",
                       width: 60,
                       height: 60,
-                    }}>
-                      <Image
-                        src={item.image}
-                        width={50}
-                        height={50}
-                        alt={`${item.name}의 사진`}
-                      />
-                    </Box>
-                    <Box display={"flex"} flexDirection={"column"} alignItems={"center"}>
-                      <Typography sx={{
+                    }}
+                  >
+                    <Image
+                      src={item.image}
+                      width={50}
+                      height={50}
+                      alt={`${item.name}의 사진`}
+                    />
+                  </Box>
+                  <Box
+                    display={"flex"}
+                    flexDirection={"column"}
+                    alignItems={"center"}
+                  >
+                    <Typography
+                      sx={{
                         fontSize: "16px",
                         fontWeight: "bold",
-                      }}>{item.name}
-                      </Typography>
-                      <Typography sx={{
+                      }}
+                    >
+                      {item.name}
+                    </Typography>
+                    <Typography
+                      sx={{
                         fontSize: "12px",
                         fontWeight: "light",
-                      }}>{item.position}</Typography>
-                    </Box>
-                  </Box>
-                  <Box>
-                    {
-                      item.review
-                    }
+                      }}
+                    >
+                      {item.position}
+                    </Typography>
                   </Box>
                 </Box>
-              );
-
-            })
-          }
+                <Box>{item.review}</Box>
+              </Box>
+            );
+          })}
         </Grid>
       </Section>
       <Section>
         <ScrollAnimation>
-          <motion.div style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-          }}>
+          <motion.div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
             <Typography
               sx={{
                 fontSize: "44px",
@@ -468,69 +503,77 @@ export default function Home() {
                 }}
               >
                 LENS
-              </span>를 사용해야 하는 이유
+              </span>
+              를 사용해야 하는 이유
             </Typography>
-            <Grid sx={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "24px",
-              marginTop: "40px",
+            <Grid
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: "24px",
+                marginTop: "40px",
 
-              "@media (max-width: 1440px)": {
-                gridTemplateColumns: "repeat(2, 1fr)",
-              },
+                "@media (max-width: 1440px)": {
+                  gridTemplateColumns: "repeat(2, 1fr)",
+                },
 
-              "@media (max-width: 768px)": {
-                gridTemplateColumns: "repeat(1, 1fr)",
-              },
-            }}>
-              {
-                reasons.map((item, index) => {
-                  return (<Box key={index} sx={{
-                    gap: "20px",
-                    borderRadius: "20px",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "100%",
-                    minWidth: "300px",
-                    maxWidth: "400px",
-                    height: "fit-content",
-                  }}>
-                    <Box sx={{
-                      width: "100%",
-                      height: "350px",
-                      minWidth: "300px",
-                      maxWidth: "400px",
-                      padding: "36px",
-                      backgroundColor: "rgba(255, 255, 255, 0.08)",
+                "@media (max-width: 768px)": {
+                  gridTemplateColumns: "repeat(1, 1fr)",
+                },
+              }}
+            >
+              {reasons.map((item, index) => {
+                return (
+                  <Box
+                    key={index}
+                    sx={{
+                      gap: "20px",
                       borderRadius: "20px",
                       display: "flex",
+                      flexDirection: "column",
                       alignItems: "center",
                       justifyContent: "center",
-                      position: "relative",
-                      overflow: "hidden",
-                    }}>
-                      <Image
-                        src={item.image}
-                        alt={`사진`}
-                        fill
-                      />
+                      width: "100%",
+                      minWidth: "300px",
+                      maxWidth: "400px",
+                      height: "fit-content",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: "100%",
+                        height: "350px",
+                        minWidth: "300px",
+                        maxWidth: "400px",
+                        padding: "36px",
+                        backgroundColor: "rgba(255, 255, 255, 0.08)",
+                        borderRadius: "20px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        position: "relative",
+                        overflow: "hidden",
+                      }}
+                    >
+                      <Image src={item.image} alt={`사진`} fill sizes="100%" />
                     </Box>
-                    <Typography sx={{
-                      fontSize: "28px",
-                      fontWeight: "bold",
-                    }}>{item.reason}</Typography>
+                    <Typography
+                      sx={{
+                        fontSize: "28px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {item.reason}
+                    </Typography>
                     <Typography>{item.description}</Typography>
-                  </Box>)
-                })
-              }
+                  </Box>
+                );
+              })}
             </Grid>
           </motion.div>
         </ScrollAnimation>
       </Section>
-    </Main >
+    </Main>
   );
 }
 

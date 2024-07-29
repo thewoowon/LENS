@@ -18,7 +18,11 @@ type FormType = {
 
 export type Mode = "chat" | "sql" | "schema";
 
-const ChatPage = ({ params }: { params: { sessionId: string | undefined } }) => {
+const ChatPage = ({
+  params,
+}: {
+  params: { sessionId: string | undefined };
+}) => {
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [chatContext, setChatContext] = useState<
@@ -55,6 +59,12 @@ const ChatPage = ({ params }: { params: { sessionId: string | undefined } }) => 
         role: "user",
       },
     ]);
+
+    // 토큰 유무를 확인하고 바로 로그인 페이지로 이동
+    if (!localStorage.getItem("accessToken")) {
+      window.location.href = "/auth/login";
+      return;
+    }
 
     if (mode === "sql") {
       try {
@@ -190,10 +200,10 @@ const ChatPage = ({ params }: { params: { sessionId: string | undefined } }) => 
       } catch (error) {
         console.error("Error fetching data:", error);
       }
-    }
+    };
 
     getHistory();
-  }, [])
+  }, []);
 
   useEffect(() => {
     // params.sessionId를 통해서 -> 테이블 정보
@@ -208,10 +218,10 @@ const ChatPage = ({ params }: { params: { sessionId: string | undefined } }) => 
       } catch (error) {
         console.error("Error fetching data:", error);
       }
-    }
+    };
 
     getTableArray();
-  }, [])
+  }, []);
 
   useEffect(() => {
     // params.sessionId를 통해서 -> SQL 히스토리
@@ -226,10 +236,10 @@ const ChatPage = ({ params }: { params: { sessionId: string | undefined } }) => 
       } catch (error) {
         console.error("Error fetching data:", error);
       }
-    }
+    };
 
     getSQLArray();
-  }, [])
+  }, []);
 
   // 메세지를 시작한다면....
 
@@ -279,11 +289,16 @@ const ChatPage = ({ params }: { params: { sessionId: string | undefined } }) => 
         {selectedTab === "SQL" && (
           <LeftScrollWrapper>
             {SQLArray.map((sql, index) => {
-              return <SQLBlock key={index} sql={sql} onClick={() => {
-                setMode("sql");
-                setValue("chat", sql.message_text);
-
-              }} />;
+              return (
+                <SQLBlock
+                  key={index}
+                  sql={sql}
+                  onClick={() => {
+                    setMode("sql");
+                    setValue("chat", sql.message_text);
+                  }}
+                />
+              );
             })}
           </LeftScrollWrapper>
         )}
