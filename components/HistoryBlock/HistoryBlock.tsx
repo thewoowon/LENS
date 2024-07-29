@@ -1,17 +1,23 @@
 import styled from "@emotion/styled";
+import { useRouter } from "next/navigation";
 
 type HistoryBlockProps = {
-  date: string;
-  title: string;
-  onClick?: () => void;
+  history: MessageWithSessionType;
 };
 
-const HistoryBlock = ({ date, title, onClick }: HistoryBlockProps) => {
+const HistoryBlock = ({ history }: HistoryBlockProps) => {
+  const router = useRouter();
   return (
     <Container>
-      <Item onClick={onClick}>
-        <div>{date}</div>
-        <div>{title}</div>
+      <Item onClick={() => {
+        router.push(`/chat/${history.session_code}`);
+      }}>
+        {
+          // 30자 이상일 경우 30자까지만 표시
+          history.message_text.length > 32
+            ? history.message_text.substring(0, 32) + "..."
+            : history.message_text
+        }
       </Item>
     </Container>
   );
@@ -22,18 +28,18 @@ export default HistoryBlock;
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  margin: 20px 0;
 `;
 
 const Item = styled.div`
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px;
-  border-bottom: 1px solid #e5e5e5;
+  padding: 6px;
   cursor: pointer;
   border-radius: 10px;
   overflow: hidden;
+  font-size: 14px;
 
   &:hover {
     background-color: rgba(0, 0, 0, 0.1);

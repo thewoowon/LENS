@@ -31,20 +31,11 @@ export const SQLArray: string[] = [
 ];
 
 export const historyArray: {
-  date: string;
-  title: string;
-}[] = [
-    {
-      date: "2021-01-01",
-      title: "TITLE1",
-    },
-    {
-      date: "2021-01-02",
-      title: "TITLE2",
-
-    },
-    {
-      date: "2021-01-03",
-      title: "TITLE3",
-    },
-  ];
+  id: number;
+  message_text: string;
+  message_type: "chat" | "sql" | "schema";
+  sender_type: "user" | "lens" | "system";
+  session_id: number;
+  timestamp: string;
+  user_id: number;
+}[] = [];

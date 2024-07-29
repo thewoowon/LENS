@@ -1,4 +1,4 @@
-import customAxios from "@/lib/axios";
+import axios from "axios";
 import { google } from "googleapis";
 
 export async function POST(req: Request) {
@@ -7,7 +7,7 @@ export async function POST(req: Request) {
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    `${process.env.NEXT_PUBLIC_API_URL}/api/auth/callback`
+    `${process.env.NEXT_PUBLIC_ORIGIN_URL}/api/auth/callback`
   );
 
   const { tokens } = await oauth2Client.getToken(code);
@@ -27,10 +27,15 @@ export async function POST(req: Request) {
   };
 
   // 서버에 요청 필요
-  const result = await customAxios({
+  const result = await axios({
+    withCredentials: true,
+    baseURL: process.env.NEXT_PUBLIC_API_URL,
+    headers: {
+      "Content-Type": "application/json",
+    },
     method: "POST",
-    url: "/api/login",
-    data: user,
+    url: "/v1/user/login",
+    data: JSON.stringify(user),
   }).then((res) => res.data);
 
   return new Response(JSON.stringify(result), {
@@ -44,7 +49,7 @@ export async function GET(req: Request) {
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    `${process.env.NEXT_PUBLIC_API_URL}/api/auth/callback`
+    `${process.env.NEXT_PUBLIC_ORIGIN_URL}/api/auth/callback`
   );
 
   const url = oauth2Client.generateAuthUrl({

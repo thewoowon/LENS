@@ -18,10 +18,10 @@ type FormType = {
 
 export type Mode = "chat" | "sql" | "schema";
 
-const ChatPage = ({
+const ChatWithSessionIdPage = ({
   params,
 }: {
-  params: { sessionId: string | undefined };
+  params: { sessionId: string };
 }) => {
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -30,6 +30,8 @@ const ChatPage = ({
       chat: string;
       role: "user" | "lens";
       data?: any[];
+      sql?: string;
+      loading?: boolean;
     }[]
   >([]);
   const [selectedTab, setSelectedTab] = useState<"table" | "SQL" | "history">(
@@ -41,6 +43,8 @@ const ChatPage = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [mode, setMode] = useState<Mode>("chat");
+
+  const websocket = useRef(null);
 
   const { getValues, watch, setValue, handleSubmit, control } =
     useForm<FormType>({
@@ -60,16 +64,8 @@ const ChatPage = ({
       },
     ]);
 
-    // 토큰 유무를 확인하고 바로 로그인 페이지로 이동
-    if (!localStorage.getItem("accessToken")) {
-      window.location.href = "/auth/login";
-      return;
-    }
-
     if (mode === "sql") {
       try {
-        // 단순 실행으로 히스토리는 저장하지 않음 -> 하지만
-        // 실행이 되었을 때는 히스토리에 저장
         const result = await customAxios("/v1/query/execute_query", {
           method: "POST",
           data: {
@@ -104,7 +100,7 @@ const ChatPage = ({
           {
             chat: "쿼리 결과입니다.",
             role: "lens",
-            data: result,
+            data: result.data,
           },
         ]);
       } catch (error) {
@@ -112,6 +108,19 @@ const ChatPage = ({
       }
     } else if (mode === "chat") {
       try {
+        setChatContext([
+          ...chatContext,
+          {
+            chat: data.chat,
+            role: "user",
+          },
+          {
+            chat: "",
+            role: "lens",
+            loading: true,
+          },
+        ]);
+
         const response = await fetch("/api/stream", {
           method: "POST",
           headers: {
@@ -124,12 +133,6 @@ const ChatPage = ({
             sessionId: params.sessionId,
           }),
         });
-
-        if (response.status === 307 && !params.sessionId) {
-          const { redirect_path } = await response.json();
-          router.replace(redirect_path);
-          return;
-        }
 
         const reader = response.body?.getReader();
         const decoder = new TextDecoder();
@@ -151,7 +154,37 @@ const ChatPage = ({
             },
           ]);
         }
+
+        // 직전 쿼리 가져오기
+        const sqlResponse = await customAxios("v1/llm/sql_history", {
+          method: "GET",
+          params: {
+            session_id: params.sessionId,
+          },
+        }).then((res) => {
+          return res.data;
+        });
+
+        for (const sql of sqlResponse) {
+          setChatContext([
+            ...chatContext,
+            {
+              chat: data.chat,
+              role: "user",
+            },
+            {
+              chat: result,
+              role: "lens",
+            },
+            {
+              sql: sql.query,
+              chat: "쿼리입니다.",
+              role: "lens",
+            },
+          ]);
+        }
       } catch (error) {
+        console.error("스트림 통신 중에 에러가 발생했어요.", error);
         toast.error("스트림 통신 중에 에러가 발생했어요.");
         setChatContext([
           ...chatContext,
@@ -186,6 +219,66 @@ const ChatPage = ({
       scrollRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 100);
   }, [chatContext]);
+
+  useEffect(() => {
+    // params.sessionId를 통해서 -> 챗 히스토리
+    const getChatHistory = async () => {
+      try {
+        const response = await customAxios(`/v1/history/get_chat_history`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          params: {
+            session_id: params.sessionId,
+          },
+        });
+
+        const { data } = response;
+
+        // data의 마지막이 user인 경우 다시 서버에 요청을 보냄.
+        if (data.length > 0 && data[data.length - 1].sender_type === "user") {
+          const response = await customAxios(`/v1/history/get_chat_history`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+            params: {
+              session_id: params.sessionId,
+            },
+          });
+
+          const { data } = response;
+          setChatContext(
+            data.map((chat: MessageType) => {
+              return {
+                chat: chat.message_text,
+                role: chat.sender_type,
+                data: [],
+              };
+            })
+          );
+          return;
+        }
+
+        setChatContext(
+          data.map((chat: MessageType) => {
+            return {
+              chat: chat.message_text,
+              role: chat.sender_type,
+              data: [],
+            };
+          })
+        );
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    getChatHistory();
+  }, [params.sessionId]);
 
   useEffect(() => {
     // params.sessionId를 통해서 -> 챗 히스토리
@@ -241,7 +334,47 @@ const ChatPage = ({
     getSQLArray();
   }, []);
 
-  // 메세지를 시작한다면....
+  // useEffect(() => {
+  //     if (params.sessionId) {
+  //         const websocket = new WebSocket(`ws://localhost:8000/ws/${params.sessionId}`);
+
+  //         websocket.onmessage = (event) => {
+  //             const message = event.data;
+  //             console.log('WebSocket message:', message);
+  //             // if (isValidJson(message)) {
+  //             //     const data = JSON.parse(message);
+  //             //     setChatContext([
+  //             //         ...chatContext,
+  //             //         {
+  //             //             chat: data.message_text,
+  //             //             role: data.sender_type,
+  //             //             data: data.data,
+  //             //         },
+  //             //     ]);
+  //             // } else {
+  //             //     setChatContext([
+  //             //         ...chatContext,
+  //             //         {
+  //             //             chat: message,
+  //             //             role: "lens",
+  //             //         },
+  //             //     ]);
+  //             // }
+  //         };
+
+  //         websocket.onclose = () => {
+  //             console.log('WebSocket disconnected');
+  //         };
+
+  //         websocket.onerror = (error) => {
+  //             console.error('WebSocket error:', error);
+  //         };
+
+  //         return () => {
+  //             websocket.close();
+  //         };
+  //     }
+  // }, [params.sessionId]);
 
   return (
     <Container>
@@ -274,6 +407,13 @@ const ChatPage = ({
         </Tabs>
         {selectedTab === "history" && (
           <LeftScrollWrapper>
+            <NewLensStartButton
+              onClick={() => {
+                router.push("/chat");
+              }}
+            >
+              새로운 LENS 시작하기
+            </NewLensStartButton>
             {chatHistory.map((history, index) => {
               return <HistoryBlock key={index} history={history} />;
             })}
@@ -314,12 +454,19 @@ const ChatPage = ({
         <Wrapper>
           <ChatContext>
             {chatContext.map((context, index) => {
-              const { chat, role, data } = context;
+              const { chat, role, data, sql, loading } = context;
               if (role === "user") {
                 return <UserChat key={index} chat={chat} ref={scrollRef} />;
               }
               return (
-                <LensChat key={index} chat={chat} data={data} ref={scrollRef} />
+                <LensChat
+                  key={index}
+                  chat={chat}
+                  data={data}
+                  ref={scrollRef}
+                  sql={sql}
+                  loading={!!loading}
+                />
               );
             })}
           </ChatContext>
@@ -336,7 +483,7 @@ const ChatPage = ({
   );
 };
 
-export default ChatPage;
+export default ChatWithSessionIdPage;
 
 const Container = styled.main`
   display: flex;
@@ -449,5 +596,22 @@ const LeftScrollWrapper = styled.div`
   -ms-overflow-style: none;
   &::-webkit-scrollbar {
     display: none;
+  }
+`;
+
+const NewLensStartButton = styled.div`
+  width: 100%;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 6px;
+  text-align: center;
+  background-color: #e0e0e0;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+
+  &:hover {
+    background-color: #c4c4c4;
   }
 `;
