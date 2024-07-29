@@ -278,7 +278,7 @@ const ChatWithSessionIdPage = ({
     };
 
     getChatHistory();
-  }, []);
+  }, [params.sessionId]);
 
   useEffect(() => {
     // params.sessionId를 통해서 -> 챗 히스토리

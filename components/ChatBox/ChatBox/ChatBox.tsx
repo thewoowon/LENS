@@ -17,19 +17,13 @@ type ChatBoxProps = {
 };
 
 const ChatBox = forwardRef<HTMLDivElement, ChatBoxProps>(
-  ({
-    onSubmit,
-    control,
-    isLoading,
-    mode,
-    setMode,
-  }, ref) => {
+  ({ onSubmit, control, isLoading, mode, setMode }, ref) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [open, setOpen] = useState(false);
     // watch the chat field value
     const chatValue = useWatch({
       control,
-      name: 'chat',
+      name: "chat",
     });
 
     const adjustHeight = () => {
@@ -113,7 +107,11 @@ const ChatBox = forwardRef<HTMLDivElement, ChatBoxProps>(
           );
         case "sql":
           return (
-            <svg id="icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+            <svg
+              id="icon"
+              viewBox="0 0 32 32"
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <defs>
                 <style>
                   {`
@@ -309,9 +307,11 @@ const ChatBox = forwardRef<HTMLDivElement, ChatBoxProps>(
             height: "100%",
           }}
         >
-          <button onClick={onSubmit} type="submit" disabled={
-            isLoading || !chatValue
-          }>
+          <button
+            onClick={onSubmit}
+            type="submit"
+            disabled={isLoading || !chatValue}
+          >
             {isLoading ? (
               <svg
                 width="10"
@@ -338,11 +338,14 @@ const ChatBox = forwardRef<HTMLDivElement, ChatBoxProps>(
             )}
           </button>
         </div>
-      </Form >
+      </Form>
     );
-  });
+  }
+);
 
 export default ChatBox;
+
+ChatBox.displayName = "ChatBox";
 
 const Form = styled.form<{
   mode: Mode;
@@ -386,10 +389,15 @@ const Form = styled.form<{
     width: 36px;
     height: 36px;
     background-color: ${(props) =>
-    props.isLoading || props.isEmpty ? "rgb(200, 200, 200)" : props.mode === "sql" ? "rgb(255, 127, 80)" : "black"};
+      props.isLoading || props.isEmpty
+        ? "rgb(200, 200, 200)"
+        : props.mode === "sql"
+          ? "rgb(255, 127, 80)"
+          : "black"};
     border: none;
     border-radius: 8px;
-    cursor: ${(props) => (props.isLoading || props.isEmpty ? "not-allowed" : "pointer")};
+    cursor: ${(props) =>
+      props.isLoading || props.isEmpty ? "not-allowed" : "pointer"};
     display: flex;
     justify-content: center;
     align-items: center;

@@ -17,57 +17,6 @@ type LensChatProps = {
 
 const LensChat = forwardRef<HTMLDivElement, LensChatProps>(
   ({ chat, data, sql, loading }, ref) => {
-    if (loading) {
-      return (
-        <Container ref={ref}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              fontWeight: "bold",
-              color: "#2E2E2E",
-            }}
-          >
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 22 22"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle cx="11" cy="11" r="11" fill="black" />
-              <mask
-                id="mask0_2050_151"
-                style={{ maskType: "alpha" }}
-                maskUnits="userSpaceOnUse"
-                x="0"
-                y="0"
-                width="22"
-                height="22"
-              >
-                <circle cx="11" cy="11" r="11" fill="black" />
-              </mask>
-              <g mask="url(#mask0_2050_151)">
-                <path
-                  d="M-1.21289 22.6828L10.8492 -5.31033L5.31125 13.3517L21.2423 0.151736L15.325 17.2966L25.263 11.6828L9.10435 26.0207L17.9802 5.08277L-1.21289 22.6828Z"
-                  fill="white"
-                />
-              </g>
-            </svg>
-            <div>LENS</div>
-          </div>
-          <div
-            style={{
-              paddingLeft: "32px",
-            }}
-          >
-            <Bounce />
-          </div>
-        </Container>
-      );
-    }
-
     const [markdownContent, setMarkdownContent] = useState<string>("");
     const [execQueryData, setExecQueryData] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -215,6 +164,57 @@ const LensChat = forwardRef<HTMLDivElement, LensChatProps>(
 
       markdown();
     }, [chat]);
+
+    if (loading) {
+      return (
+        <Container ref={ref}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              fontWeight: "bold",
+              color: "#2E2E2E",
+            }}
+          >
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 22 22"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle cx="11" cy="11" r="11" fill="black" />
+              <mask
+                id="mask0_2050_151"
+                style={{ maskType: "alpha" }}
+                maskUnits="userSpaceOnUse"
+                x="0"
+                y="0"
+                width="22"
+                height="22"
+              >
+                <circle cx="11" cy="11" r="11" fill="black" />
+              </mask>
+              <g mask="url(#mask0_2050_151)">
+                <path
+                  d="M-1.21289 22.6828L10.8492 -5.31033L5.31125 13.3517L21.2423 0.151736L15.325 17.2966L25.263 11.6828L9.10435 26.0207L17.9802 5.08277L-1.21289 22.6828Z"
+                  fill="white"
+                />
+              </g>
+            </svg>
+            <div>LENS</div>
+          </div>
+          <div
+            style={{
+              paddingLeft: "32px",
+            }}
+          >
+            <Bounce />
+          </div>
+        </Container>
+      );
+    }
 
     if (sql) {
       return (
