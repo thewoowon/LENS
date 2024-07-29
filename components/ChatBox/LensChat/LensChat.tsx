@@ -459,7 +459,7 @@ const LensChat = forwardRef<HTMLDivElement, LensChatProps>(
                 }}
               >
                 <Button onClick={downloadCSV}>
-                  CS
+                  CSV
                   <svg
                     width="14"
                     height="14"
