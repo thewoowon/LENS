@@ -139,19 +139,13 @@ const LensChat = forwardRef<HTMLDivElement, LensChatProps>(
     };
 
     const downloadTXT = () => {
-      const text = execQueryData
-        .map((item) => {
-          return Object.entries(item)
-            .map(([key, value]) => `${key}: ${value}`)
-            .join("\n");
-        })
-        .join("\n\n");
+      const text = sql || "";
 
       const blob = new Blob([text], { type: "text/plain;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "data.txt";
+      a.download = "sql.txt";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
