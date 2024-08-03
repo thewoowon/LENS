@@ -598,6 +598,7 @@ const LensChat = forwardRef<HTMLDivElement, LensChatProps>(
               backgroundColor: "white",
               border: "1px solid #E5E5E5",
               color: "black",
+              width: "100%",
             }}
           >
             {data.slice(0, 1).map((row, idx1) => (
@@ -689,6 +690,8 @@ const Container = styled.div`
   margin-bottom: 40px;
   gap: 10px;
   max-width: 1000px;
+  width: 100%;
+  height: fit-content;
 
   tr {
     scrollbar-width: none;
