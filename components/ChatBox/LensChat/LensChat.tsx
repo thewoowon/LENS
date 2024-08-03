@@ -613,7 +613,7 @@ const LensChat = forwardRef<HTMLDivElement, LensChatProps>(
                 }}
               >
                 {Object.keys(row).map((key: string, idx2: number) => (
-                  <td
+                  <th
                     key={idx2}
                     style={{
                       display: "flex",
@@ -629,7 +629,7 @@ const LensChat = forwardRef<HTMLDivElement, LensChatProps>(
                     }}
                   >
                     <div>{key}</div>
-                  </td>
+                  </th>
                 ))}
               </thead>
             ))}

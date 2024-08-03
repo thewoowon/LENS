@@ -73,7 +73,7 @@ const ChatWithSessionIdPage = ({
           },
         })
           .then((res) => {
-            return res.data;
+            return res;
           })
           .catch((error) => {
             return error.response;
@@ -269,6 +269,7 @@ const ChatWithSessionIdPage = ({
               chat: chat.message_text,
               role: chat.sender_type,
               data: [],
+              sql: chat.message_type === "sql" ? chat.message_text : undefined,
             };
           })
         );
