@@ -20,6 +20,8 @@ const LensChat = forwardRef<HTMLDivElement, LensChatProps>(
     const [markdownContent, setMarkdownContent] = useState<string>("");
     const [execQueryData, setExecQueryData] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    // 실행 카운트를 저장하는 변수
+    const [execCount, setExecCount] = useState<number>(0);
     const handleOnClick = async (query: string) => {
       setIsLoading(true);
       const result = await customAxios("/v1/query/execute_query", {
@@ -36,6 +38,7 @@ const LensChat = forwardRef<HTMLDivElement, LensChatProps>(
         });
       setIsLoading(false);
       setExecQueryData(result);
+      setExecCount((prev) => prev + 1);
     };
 
     const sqlHandler = (sql: string) => {
@@ -390,7 +393,7 @@ const LensChat = forwardRef<HTMLDivElement, LensChatProps>(
                         ))}
                     </tbody>
                   </table>
-                ) : (
+                ) : execCount > 0 ? (
                   <div
                     style={{
                       display: "flex",
@@ -438,7 +441,29 @@ const LensChat = forwardRef<HTMLDivElement, LensChatProps>(
                         <path d="M-7.06201 131.973L63.1173 -30.8965L30.8966 77.6829L123.586 0.882795L89.1587 100.635L146.979 67.9725L52.9656 151.393L104.607 29.5725L-7.06201 131.973Z" />
                       </G>
                     </svg>
-                    데이터가 없어요 😢
+                    조회된 데이터가 없어요 😢
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      height: "100%",
+                      fontSize: "16px",
+                      color: "#2E2E2E",
+                      gap: "16px",
+                    }}
+                  >
+                    <Button
+                      onClick={() => {
+                        handleOnClick(sql);
+                      }}
+                    >
+                      쿼리 실행
+                    </Button>
+                    SQL을 실행해보세요! 🚀
                   </div>
                 )}
               </DataContainer>
